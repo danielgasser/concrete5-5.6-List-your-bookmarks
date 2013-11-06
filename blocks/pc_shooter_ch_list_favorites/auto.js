@@ -20,36 +20,30 @@ $(document).ready(function () {
 
 
     $('[id^="seeErrors_"]').live('click', function () {
-        var ref = $(this).attr('id').split('_')[1];
-        window.console.log($(this).parent('div>input').attr('name'));
-        //jDt = checkBookMark(jDt);
-        window.console.log(jDt);
+        var ref = $(this).attr('id').split('_')[1],
+            instance = $(this).parent('div'),
+            go = $('[name="testbookmark_' + ref + '"]').attr('id').split('_');
+        jDt = checkBookMark(go, instance, false);
         loadUrlErrorDialog(jDt);
     })
     $('[name^="testbookmark_').live('click', function (e) {
         e.preventDefault();
         var instance= this,
             data = $(this).attr('id').split('_');
-        jDt = checkBookMark(data, instance);
+        jDt = checkBookMark(data, instance, true);
     })
 })
-checkBookMark = function (valData, instance){
+checkBookMark = function (valData, instance, detailsClick){
     var goto,
         d,
         ref = valData[valData.length - 1],
         jData = {};
     d = valData.splice(valData.length - 1, 1)
-    window.console.log('d');
-    window.console.log(d);
     goto = valData.join('_');
-    window.console.log('valData');
-    window.console.log(valData);
-    window.console.log('goto');
-    window.console.log(goto);
-    window.console.log('ref');
-    window.console.log(ref);
+
     $.ajax({
         type: 'POST',
+        async: false,
         url: goto,
         data: {
             bookMark : ref
@@ -71,8 +65,10 @@ checkBookMark = function (valData, instance){
             var text = '',
                 isNull = (data === 'false') ? true : false;
             jData = $.parseJSON(data);
+            window.console.log(jData);
             $.each(jData, function(i, n){
-                //$('#cE' + i).remove();
+                window.console.log(i);
+                $('#cE' + i).remove();
                 if (isNull) {
                     $(instance).val(ccm_t('bookmark-error'));
                     text = ccm_t('no-errors-to-show');
@@ -81,11 +77,12 @@ checkBookMark = function (valData, instance){
                         $(instance).val(ccm_t('bookmark-valid'));
                     } else {
                         $(instance).val(ccm_t('bookmark-error'));
-                        text = '<div class="formentry" style="float: right;" id="cE' + i + '"><input id="seeErrors_' + ref + '" type="button" value="' + ccm_t('see-errors') + '" />';
+                        $(instance).parent('div').append('<div class="formentry" style="float: right;" id="cE' + i + '"><input id="seeErrors_' + i + '" type="button" value="' + ccm_t('see-errors') + '" />');
+                        return false;
                     }
                 }
             });
-            $(instance).parent('div').append(text + '</div>');
+            //$(instance).parent('div').append(text + '</div>');
             $('#ajax-loader').hide();
         }
     });
