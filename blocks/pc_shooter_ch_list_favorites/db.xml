@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<schema version="0.3">
+	<table name="btPcShooterChListFavorites">
+		<field name="bID" type="I">
+            <key />
+			<unsigned/>
+		</field>
+        <field name="btPcShooterChListFavoritesBlockText" type="C" size="255">
+        </field>
+
+    </table>
+    <table name="btPcShooterChListFavoritesBookMarks">
+        <field name="bookmarkID" type="I">
+            <key />
+            <AUTOINCREMENT/>
+            <unsigned/>
+        </field>
+        <field name="blockID" type="I">
+            <unsigned/>
+        </field>
+        <field name="btPcShooterChListFavoritesBookMarksDate" type="D">
+        </field>
+        <field name="btPcShooterChListFavoritesBookMarksIcon" type="B">
+        </field>
+        <field name="btPcShooterChListFavoritesBookMarksText" type="C" size="255">
+        </field>
+        <field name="btPcShooterChListFavoritesBookMarksUrl" type="C" size="255">
+        </field>
+    </table>
+</schema>

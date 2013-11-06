@@ -1,0 +1,66 @@
+#showFile {
+    height: 0px;
+}
+#editBookmarksTable {
+    border: 1px solid #ff0000;
+    height: 180px;
+    width: 100%;
+
+}
+#manage-bookmarks {
+    position: relative;
+}
+#ajax-loader {
+    display: none;
+	width: 32px;
+	height: 32px;
+	position: absolute;
+	top: 40%;
+	left: 40%;
+    z-index: 111111111;
+}
+.url {
+    max-width: 10em;
+    overflow-x: scroll;
+}
+form .formentry {
+    float: left;
+    width: auto;
+}
+form .formentry img{
+    width: 16px;
+    max-width: 16px;
+    height: 16px;
+    max-height: 16px;
+}
+form .links-form {
+    madrgin: 1em;
+    padding: 2px 0px 2px 0px;
+    float: left;
+    width: 100%;
+}
+form .odd {
+    background: #d4d4d4;
+
+}form .even {
+    background: #a9a9a9;
+}
+#btPcShooterChListFavoritesUrl {
+    width: 24em;
+}
+.break {
+    clear: both;
+}
+#url-error-dialog {
+    margin: 2em;
+}
+.url-error-dialog-container {
+    font-style: italic;
+    margin: 0.25em;
+}
+.url-error-dialog-container .key {
+    color: #3c3c3c;
+}
+.url-error-dialog-container .value {
+    color: #9a2534;
+}
