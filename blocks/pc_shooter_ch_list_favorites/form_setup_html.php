@@ -15,17 +15,17 @@ if ($controller->getFileID() > 0) {
 
 ?>
 
+<ul id="tabset" class="ccm-dialog-tabs">
+    <li> <a href="#managebookmarks"><?php echo t("Manage bookmarks"); ?></a></li>
+    <li><a href="#blockoptions"><?php echo t("Block options"); ?></a></li>
+</ul>
 <script>
     var ajaxCall = '<?= $check_url; ?>',
         saveForm = '<?php echo $this->action("save_form"); ?>',
         urlChange = null;
 </script>
-<ul id="tabset" class="ccm-dialog-tabs">
-    <li> <a href="#manage-bookmarks"><?php echo t("Manage bookmarks"); ?></a></li>
-    <li><a href="#block-options"><?php echo t("Block options"); ?></a></li>
-</ul>
 
-<div id="manage-bookmarks">
+<div id="managebookmarks">
     <label for="thafile"><?php echo t('Select bookmark.htm(l)'); ?></label>
     <br>
     <input class="ccm-form-fileset" name="thafile" id="thafile" type="file" />
@@ -84,11 +84,11 @@ if ($controller->getFileID() > 0) {
         ?>
     </div>
 </div>
-<div id="block-options">
+<div id="blockoptions">
     <?php
-   echo $form->label('multiBlock', t('Block options'));
+   echo $form->label('btPcShooterChListFavoritesBlockMultiBlock', t('Block options'));
     echo '<br>';
-    echo  $form->select('multiBlock', array(
+    echo  $form->select('btPcShooterChListFavoritesBlockMultiBlock', array(
         'multi' => t('Each bookmark in a block'),
         'one' => t('One block for all bookmarks')), 'multi');
     ?>
