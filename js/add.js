@@ -115,7 +115,7 @@ createForm = function (l) {
             fstr += '<div class="formentry"><input type="text" id="btPcShooterChListFavoritesBookMarksDate_' + i + '" name="btPcShooterChListFavoritesBookMarksDate[]" value="' + l[i].dateAdded + '" /></div>';
             fstr += '<div class="formentry"><input type="text" id="btPcShooterChListFavoritesBookMarksUrl_' + i + '" name="btPcShooterChListFavoritesBookMarksUrl[]" value="' + l[i].url + '" /></div>';
             fstr += '<div class="formentry"><input type="button" name="testbookmark_' + i + '" class="testbookmark" id="' + ajaxCall + '_' + l[i].url + '" value="' + ccm_t('test-link') + '" /></div>';
-            fstr += '<div id="showerrors" class="formentry"></div>';
+            fstr += '<div id="showerrors_' + i +'" class="formentry"></div>';
         } else {
             fstr += '<div class="formentry"><input type="hidden" id="btPcShooterChListFavoritesBookMarksDate_' + i + '" name="btPcShooterChListFavoritesBookMarksDate[]" value="" /></div>';
             fstr += '<div class="formentry"><input type="hidden" id="btPcShooterChListFavoritesBookMarksUrl_' + i + '" name="btPcShooterChListFavoritesBookMarksUrl[]" value="" /></div>';

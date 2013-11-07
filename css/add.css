@@ -64,3 +64,6 @@ form .odd {
 .url-error-dialog-container .value {
     color: #9a2534;
 }
+.url-error-dialog-ref {
+    font-style: italic;
+}

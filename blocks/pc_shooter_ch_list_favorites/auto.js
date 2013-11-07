@@ -20,20 +20,45 @@ $(document).ready(function () {
 
 
     $('[id^="seeErrors_"]').live('click', function () {
-        var ref = $(this).attr('id').split('_')[1],
-            instance = $(this).parent('div'),
-            go = $('[name="testbookmark_' + ref + '"]').attr('id').split('_');
-        jDt = checkBookMark(go, instance, false);
-        loadUrlErrorDialog(jDt);
+        var entryId = $(this).attr('id').split('_')[1],
+            instance = $('[name="testbookmark_' + entryId + '"]'),
+            data = instance.attr('id').split('_'),
+            ref = $('#btPcShooterChListFavoritesBookMarksUrl_' + entryId).val();
+        jDt = checkBookMark(data, instance);
+        loadUrlErrorDialog(jDt, ref);
     })
+
     $('[name^="testbookmark_').live('click', function (e) {
         e.preventDefault();
         var instance= this,
             data = $(this).attr('id').split('_');
-        jDt = checkBookMark(data, instance, true);
+        jDt = checkBookMark(data, instance);
+    })
+
+    $('#url-error-dialog-print').live('click', function (e) {
+        //e.preventDefault();
+        var content = document.getElementById("url-error-dialog");
+        var pri = document.getElementById("url-error-dialog-print-content").contentWindow;
+        pri.document.open();
+        pri.document.write(content.innerHTML);
+        pri.document.close();
+        pri.focus();
+        pri.print();
+    })
+
+    $('#url-error-dialog-close').live('click', function (e) {
+        e.preventDefault();
+        ccm_blockWindowClose();
     })
 })
-checkBookMark = function (valData, instance, detailsClick){
+
+/**
+ *
+ * @param valData
+ * @param instance
+ * @returns {{}}
+ */
+checkBookMark = function (valData, instance){
     var goto,
         d,
         ref = valData[valData.length - 1],
@@ -62,56 +87,106 @@ checkBookMark = function (valData, instance, detailsClick){
          *
          */
         success: function (data) {
-            var text = '',
-                isNull = (data === 'false') ? true : false;
+            var errorText = '',
+                isNull = (data === 'false') ? true : false,
+                urlValid = false,
+                counter = null;
             jData = $.parseJSON(data);
-            window.console.log(jData);
             $.each(jData, function(i, n){
-                window.console.log(i);
-                $('#cE' + i).remove();
                 if (isNull) {
-                    $(instance).val(ccm_t('bookmark-error'));
-                    text = ccm_t('no-errors-to-show');
+                    urlValid = null;
+                    //return false;
                 } else if ($.isNumeric(i)){
+                    errorText = n;
                     if (n.indexOf('200') > -1){
-                        $(instance).val(ccm_t('bookmark-valid'));
+                        urlValid = true;
                     } else {
-                        $(instance).val(ccm_t('bookmark-error'));
-                        $(instance).parent('div').append('<div class="formentry" style="float: right;" id="cE' + i + '"><input id="seeErrors_' + i + '" type="button" value="' + ccm_t('see-errors') + '" />');
-                        return false;
+                        urlValid = false;
+                        counter = i;
                     }
                 }
             });
-            //$(instance).parent('div').append(text + '</div>');
+            // Display result of url-check
+            displayUrlCheck(instance, urlValid);
             $('#ajax-loader').hide();
         }
     });
     return jData;
 }
-loadUrlErrorDialog = function(obj) {
+
+
+/**
+ * Displays 'See error button' and/or header-status text
+ * @param check: true, false or null
+ */
+displayUrlCheck = function (instance, check) {
+    var c = $(instance).attr('name').split('_')[1],
+        errorEl = (c !== null) ? $('#showerrors_' + c) : $(''),
+        errorButton = (c !== null) ? '<div class="formentry" style="float: right;" id="cE' + c + '"><input id="seeErrors_' + c + '" type="button" value="' + ccm_t('see-errors') + '" />' : '';
+
+    switch (check) {
+        case null:
+            $(instance).val(ccm_t('bookmark-error'));
+            errorEl.html(errorButton);
+            break;
+        case true:
+            $(instance).val(ccm_t('bookmark-valid'));
+            break;
+        case false:
+            $(instance).val(ccm_t('bookmark-error'));
+            errorEl.html(errorButton);
+            break;
+    }
+}
+
+/**
+ *
+ * @param data
+ * @returns {string}
+ */
+createDialogElement = function (data) {
     var str = '<div id="url-error-dialog">',
         falseStr = '';
-    $.each(obj, function(n, i){
-        window.console.log(n);
-        window.console.log(i);
-        falseStr = (i === false) ? ccm_t('no-errors-to-show') : i;
-        str += '<div class="url-error-dialog-container"><span class="key">' + n + '</span>: <span class="value">\"' + falseStr + '\"</span></div>';
-    })
+    if (falseStr = (typeof data === 'boolean')) {
+        falseStr = ccm_t('no-errors-to-show');
+        str += '<div class="url-error-dialog-container"><span class="value">' + falseStr + '</span></div>';
+    }else {
+        $.each(data, function (n, i) {
+            str += '<div class="url-error-dialog-container"><span class="key">' + n + '</span>: <span class="value">\"' + falseStr + i + '\"</span></div>';
+        })
+    }
+    str += '<div class="ccm-buttons dialog-buttons">' +
+        '<a href="javascript::void(0)" id="url-error-dialog-close" class="btn ccm-button-right cancel">' + ccm_t('close') + '</a>' +
+        '<a href="javascript::void(0)" id="url-error-dialog-print" class="btn ccm-button-left cancel">' + ccm_t('print') + '</a>' +
+        '</div>';
+        //jQuery.fn.dialog
     str += '</div>';
-    window.console.log(obj);
-    jQuery.fn.dialog.open({
-        title: ccm_t('url-error-dialog-title') + ': ' + obj.TestedUrl,
-        element: str,
-        width: 550,
-        modal: false,
-        height: 275,
-        onClose: function() {
-            //alert('This will fire when the dialog is closed.');
-        }
-    });
+    return str += '<iframe id="url-error-dialog-print-content" style="height: 0px; width: 0px; position: absolute"></iframe>'
 }
+
+
+/**
+ *
+ * @param el
+ * @param index
+ */
 updateTestbookMarkValue = function (el, index) {
     $('[name="testbookmark_' + index + '"]').attr('id', ajaxCall + '_' + el);
+}
+
+
+/**
+ *  ------ C5 Overrides -----------------
+ */
+
+loadUrlErrorDialog = function (obj, ref) {
+    jQuery.fn.dialog.open({
+        title: ccm_t('url-error-dialog-title') + ': ' + '<span class="url-error-dialog-ref">' + ref + '</span>',
+        element: createDialogElement(obj),
+        width: 550,
+        modal: false,
+        height: 275
+    });
 }
 
 ccmValidateBlockForm = function() {

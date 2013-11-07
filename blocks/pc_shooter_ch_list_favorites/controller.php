@@ -1,6 +1,9 @@
 <?php 
 	defined('C5_EXECUTE') or die("Access Denied.");
-	
+
+/**
+ * Class PcShooterChListFavoritesBlockController
+ */
 class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block_File {
     protected $btName = "List Your Bookmarks";
     protected $btTable = 'btPcShooterChListFavorites';
@@ -31,10 +34,14 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
             'bookmark-error' => t('This bookmark is not a valid URL.'),
             'see-errors' => t('See header details.'),
             'url-error-dialog-title' => t('Header details for URL'),
-            'no-errors-to-show' => t('No errors to show.'),
+            // Der angegebene Host ist unbekannt
+            'no-errors-to-show' => t('The specified host is unknown.'),
             'bookmark-valid' => t('This bookmark is valid.'),
             'no-js-links' => t('No JavaScript-links allowed!'),
-            'num-records' => t('Entries')
+            'num-records' => t('Entries'),
+            'close' => t('Close'),
+            'print' => t('Print'),
+            'copy' => t('Copy')
         );
     }
 
@@ -87,42 +94,6 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
         $this->addHeaderItem($html->javascript(BASE_URL . DIR_REL . '/' . DIRNAME_PACKAGES . '/' . self::getPkgHandle() . '/js/add.js'));
     }
 
-    private function set_package_tool($tool_name){
-        $tool_helper = Loader::helper('concrete/urls');
-        $this->set ( $tool_name, $tool_helper->getToolsURL($tool_name, $this->getPkgHandle()));
-    }
-
-    /**
-     * Creates 2-dimensional array out of 4 1-dimensional ones * number of records (4 form-fields per record)
-     * Array [number of records][number of form-fields]
-     *
-     * @param $args: Posted values
-     * @return string: The VALUES - part of the query-string
-     */
-    private function transformPosts($args){
-        $queryStr = 'INSERT INTO ' . $this->bookmarkTable . ' (' . $this->bookmarkTableForeignKeyField . ', ';
-        $counterFields = 0;
-        $ret = array();
-        foreach($args as $key => $val){
-            if (strpos($key, $this->bookmarkTable) !== false ){
-                $queryStr .= $key . ', ';
-            }
-            if (is_array($val)){
-                $counterValues = 0;
-                while($counterValues <  sizeof($val)){
-                    $finalArr[$counterValues][$counterFields] = $val[$counterValues];
-                    $counterValues++;
-                }
-                $counterFields++;
-            }
-        }
-        $queryStr = substr($queryStr, 0, -2);
-        $queryStr .= ') VALUES ';
-        $ret[0] = $finalArr;
-        $ret[1] = $queryStr;
-        return $ret;
-    }
-
     /**
      * Create query string
      * Reason: A 2-dimensional array is passed
@@ -151,5 +122,43 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
         $valuesStr = substr($valuesStr, 0,  -2);
 
         return $valuesStr;
+    }
+
+    private function set_package_tool($tool_name)
+    {
+        $tool_helper = Loader::helper('concrete/urls');
+        $this->set($tool_name, $tool_helper->getToolsURL($tool_name, $this->getPkgHandle()));
+    }
+
+    /**
+     * Creates 2-dimensional array out of 4 1-dimensional ones * number of records (4 form-fields per record)
+     * Array [number of records][number of form-fields]
+     *
+     * @param $args: Posted values
+     * @return string: The VALUES - part of the query-string
+     */
+    private function transformPosts($args)
+    {
+        $queryStr = 'INSERT INTO ' . $this->bookmarkTable . ' (' . $this->bookmarkTableForeignKeyField . ', ';
+        $counterFields = 0;
+        $ret = array();
+        foreach ($args as $key => $val) {
+            if (strpos($key, $this->bookmarkTable) !== false) {
+                $queryStr .= $key . ', ';
+            }
+            if (is_array($val)) {
+                $counterValues = 0;
+                while ($counterValues < sizeof($val)) {
+                    $finalArr[$counterValues][$counterFields] = $val[$counterValues];
+                    $counterValues++;
+                }
+                $counterFields++;
+            }
+        }
+        $queryStr = substr($queryStr, 0, -2);
+        $queryStr .= ') VALUES ';
+        $ret[0] = $finalArr;
+        $ret[1] = $queryStr;
+        return $ret;
     }
 }
