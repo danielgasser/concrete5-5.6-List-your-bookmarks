@@ -66,11 +66,11 @@ getLinks = function () {
                 btPcShooterChListFavoritesBookMarksText: linkText,
                 btPcShooterChListFavoritesBookMarksDate: showDate,
                 btPcShooterChListFavoritesBookMarksIcon: linkIcon,
-                btPcShooterChListFavoritesBookMarksUrl: jsLink,
-                isLink: (linkRef.length > 0)
+                btPcShooterChListFavoritesBookMarksUrl: jsLink
             }
         );
     });
+    window.console.log(links)
     createForm(links);
 };
 
@@ -85,18 +85,26 @@ createForm = function (l) {
         i,
         numrec = '',
         showImg,
-        title,
-        titleEnd,
+        title = '',
+        titleEnd = '',
         urlChange = null,
         oddEven,
+        isLink = true,
         blankImg = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D'; // 26 Bytes
 
     //TODO in Version 2.0: add icons
     //var fstr = '<div class="formentry"><input type="file" id="btPcShooterChListFavoritesIcon" name="btPcShooterChListFavoritesIcon[]" value="' + l.icon + '" /></div>';
     for (i = 0; i < l.length; i += 1) {
         showImg = (l[i].btPcShooterChListFavoritesBookMarksIcon.length === 0) ? blankImg : l[i].btPcShooterChListFavoritesBookMarksIcon;
-        title = (l[i].isLink) ? '' : '<h3>';
-        titleEnd = (l[i].isLink) ? '' : '</h3>';
+        if (l[i].btPcShooterChListFavoritesBookMarksUrl === '' || l[i].btPcShooterChListFavoritesBookMarksUrl === undefined){
+            title = '<h3>';
+            titleEnd = '</h3>';
+            isLink = false;
+        } else {
+            isLink = true;
+            title = '';
+            titleEnd = '';
+        }
         oddEven = (i % 2 === 0) ? 'even' : 'odd';
         numrec = '';
 
@@ -106,15 +114,15 @@ createForm = function (l) {
         }
         fstr += '<div class="formentry">' + numrec + '</div>';
         fstr += '<div class="break"></div>';
-        if (l[i].isLink) {
+        if (isLink) {
             fstr += '<div class="formentry"><img name="icon" id="icon" src="' + showImg + '" /></div>';
         }
         fstr += '<input type="hidden" name="btPcShooterChListFavoritesBookMarksIcon[]" id="btPcShooterChListFavoritesBookMarksIcon_' + i + '" value="' + showImg + '" />';
         fstr += '<div class="formentry">' + title + '<input class="ccm-input-text" type="text" id="btPcShooterChListFavoritesBookMarksText_' + i + '" name="btPcShooterChListFavoritesBookMarksText[]" value="' + l[i].btPcShooterChListFavoritesBookMarksText + '" />' + titleEnd + '</div>';
-        if (l[i].isLink) {
+        if (isLink) {
             fstr += '<div class="formentry"><input type="text" id="btPcShooterChListFavoritesBookMarksDate_' + i + '" name="btPcShooterChListFavoritesBookMarksDate[]" value="' + l[i].btPcShooterChListFavoritesBookMarksDate + '" /></div>';
             fstr += '<div class="formentry"><input type="text" id="btPcShooterChListFavoritesBookMarksUrl_' + i + '" name="btPcShooterChListFavoritesBookMarksUrl[]" value="' + l[i].btPcShooterChListFavoritesBookMarksUrl + '" /></div>';
-            fstr += '<div class="formentry"><input type="button" name="testbookmark_' + i + '" class="testbookmark" id="' + ajaxCall + '_' + l[i].btPcShooterChListFavoritesBookMarksUrl + '" value="' + ccm_t('test-link') + '" /></div>';
+            fstr += '<div class="formentry"><input type="button" name="testbookmark_' + i + '" class="testbookmark" id="' + ajaxCall + '__' + l[i].btPcShooterChListFavoritesBookMarksUrl + '" value="' + ccm_t('test-link') + '" /></div>';
             fstr += '<div id="showerrors_' + i +'" class="formentry"></div>';
         } else {
             fstr += '<div class="formentry"><input type="hidden" id="btPcShooterChListFavoritesBookMarksDate_' + i + '" name="btPcShooterChListFavoritesBookMarksDate[]" value="" /></div>';

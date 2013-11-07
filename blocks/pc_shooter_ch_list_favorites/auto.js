@@ -22,7 +22,7 @@ $(document).ready(function () {
     $('[id^="seeErrors_"]').live('click', function () {
         var entryId = $(this).attr('id').split('_')[1],
             instance = $('[name="testbookmark_' + entryId + '"]'),
-            data = instance.attr('id').split('_'),
+            data = instance.attr('id').split('__'),
             ref = $('#btPcShooterChListFavoritesBookMarksUrl_' + entryId).val();
         jDt = checkBookMark(data, instance);
         loadUrlErrorDialog(jDt, ref);
@@ -31,7 +31,7 @@ $(document).ready(function () {
     $('[name^="testbookmark_"]').live('click', function (e) {
         e.preventDefault();
         var instance= this,
-            data = $(this).attr('id').split('_');
+            data = $(this).attr('id').split('__');
         jDt = checkBookMark(data, instance);
     })
 
@@ -65,7 +65,10 @@ checkBookMark = function (valData, instance){
         jData = {};
     d = valData.splice(valData.length - 1, 1)
     goto = valData.join('_');
-
+    window.console.log('goto')
+    window.console.log(goto)
+    window.console.log('ref')
+    window.console.log(ref)
     $.ajax({
         type: 'POST',
         async: false,
@@ -87,6 +90,7 @@ checkBookMark = function (valData, instance){
          *
          */
         success: function (data) {
+            window.console.log(data)
             var errorText = '',
                 isNull = (data === 'false') ? true : false,
                 urlValid = false,
@@ -171,7 +175,7 @@ createDialogElement = function (data) {
  * @param index
  */
 updateTestbookMarkValue = function (el, index) {
-    $('[name="testbookmark_' + index + '"]').attr('id', ajaxCall + '_' + el);
+    $('[name="testbookmark_' + index + '"]').attr('id', ajaxCall + '__' + el);
 }
 
 
@@ -180,8 +184,9 @@ updateTestbookMarkValue = function (el, index) {
  */
 
 loadUrlErrorDialog = function (obj, ref) {
+    var shortref = ref.substring(0, 47) + '... ';
     jQuery.fn.dialog.open({
-        title: ccm_t('url-error-dialog-title') + ': ' + '<span class="url-error-dialog-ref">' + ref + '</span>',
+        title: ccm_t('url-error-dialog-title') + ': ' + '<div class="url-error-dialog-ref">' + shortref + '</div>',
         element: createDialogElement(obj),
         width: 550,
         modal: false,

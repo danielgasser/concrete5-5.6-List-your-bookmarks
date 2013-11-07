@@ -66,4 +66,5 @@ form .odd {
 }
 .url-error-dialog-ref {
     font-style: italic;
+    float: left;
 }

@@ -12,7 +12,7 @@ $includeAssetLibrary = true;
 if ($controller->getFileID() > 0) {
     $bf = $controller->getFileObject();
 }
-
+print_r($soUndSo);
 ?>
 
 <ul id="tabset" class="ccm-dialog-tabs">
@@ -22,7 +22,21 @@ if ($controller->getFileID() > 0) {
 <script>
     var ajaxCall = '<?= $check_url; ?>',
         saveForm = '<?php echo $this->action("save_form"); ?>',
-        urlChange = null;
+        urlChange = null,
+        data = {};
+
+
+    data = '<?php echo json_encode($soUndSo); ?>';
+    $(document).ready(function () {
+        data = $.parseJSON(data);
+        window.console.log(data)
+        if (data !== null){
+            $.each(data, function (i, n) {
+                delete data[i].blockID;
+                delete data[i].bookmarkID;
+            })
+        }
+    })
 </script>
 
 <div id="managebookmarks">
@@ -33,7 +47,13 @@ if ($controller->getFileID() > 0) {
     <div id="showFile">
     </div>
     <div id="editBookmarks">
+        <script>
+            if (data !== null) {
+                createForm(data);
+            }
+        </script>
         <?php
+ /*
             if (sizeof($soUndSo) > 0){
                 $i = 0;
                 $blankImg = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D'; // 26 Bytes
@@ -81,6 +101,7 @@ if ($controller->getFileID() > 0) {
                 }
                  echo '<input type="hidden" name="numRecords" id="numRecords" value="' .sizeof($soUndSo) . '">';
             }
+ */
         ?>
     </div>
 </div>

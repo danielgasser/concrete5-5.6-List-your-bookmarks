@@ -79,7 +79,6 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
         $queryStr = $newArgs[1];
         $queryStr .= self::createQueryString($newArgs[0]);
         $db->Execute($queryStr);
-       // print $queryStr;
     }
 
     public function view() {
