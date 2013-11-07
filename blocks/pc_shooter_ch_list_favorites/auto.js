@@ -28,7 +28,7 @@ $(document).ready(function () {
         loadUrlErrorDialog(jDt, ref);
     })
 
-    $('[name^="testbookmark_').live('click', function (e) {
+    $('[name^="testbookmark_"]').live('click', function (e) {
         e.preventDefault();
         var instance= this,
             data = $(this).attr('id').split('_');
