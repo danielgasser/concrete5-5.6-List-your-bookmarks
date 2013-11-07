@@ -52,9 +52,9 @@ if ($controller->getFileID() > 0) {
 
                     echo '<div class="links-form ' . $oddEven . '">';
                     if ($i === 0) {
-                        $numrec = ccm_t('num-records')  + ': ' + sizeof($soUndSo);
+                        $numrec = t('num-records')  . ': ' . sizeof($soUndSo);
                     }
-                    echo '<div class="formentry">' + $numrec + '</div>';
+                    echo '<div class="formentry">' . $numrec . '</div>';
                     echo '<div class="break"></div>';
                     echo '<div class="formentry"><img name="icon" id="icon" src="' . $showImg . '" /></div>';
                     echo '<input type="hidden" name="btPcShooterChListFavoritesBookMarksIcon[]" id="btPcShooterChListFavoritesBookMarksIcon_' . $i . '" value="' . $showImg . '" />';

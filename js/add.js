@@ -63,10 +63,10 @@ getLinks = function () {
         jsLink = (linkRef.indexOf('javascript') > -1) ? ccm_t('no-js-links') : linkRef;
         links.push(
             {
-                text: linkText,
-                dateAdded: showDate,
-                icon: linkIcon,
-                url: jsLink,
+                btPcShooterChListFavoritesBookMarksText: linkText,
+                btPcShooterChListFavoritesBookMarksDate: showDate,
+                btPcShooterChListFavoritesBookMarksIcon: linkIcon,
+                btPcShooterChListFavoritesBookMarksUrl: jsLink,
                 isLink: (linkRef.length > 0)
             }
         );
@@ -94,7 +94,7 @@ createForm = function (l) {
     //TODO in Version 2.0: add icons
     //var fstr = '<div class="formentry"><input type="file" id="btPcShooterChListFavoritesIcon" name="btPcShooterChListFavoritesIcon[]" value="' + l.icon + '" /></div>';
     for (i = 0; i < l.length; i += 1) {
-        showImg = (l[i].icon.length === 0) ? blankImg : l[i].icon;
+        showImg = (l[i].btPcShooterChListFavoritesBookMarksIcon.length === 0) ? blankImg : l[i].btPcShooterChListFavoritesBookMarksIcon;
         title = (l[i].isLink) ? '' : '<h3>';
         titleEnd = (l[i].isLink) ? '' : '</h3>';
         oddEven = (i % 2 === 0) ? 'even' : 'odd';
@@ -110,11 +110,11 @@ createForm = function (l) {
             fstr += '<div class="formentry"><img name="icon" id="icon" src="' + showImg + '" /></div>';
         }
         fstr += '<input type="hidden" name="btPcShooterChListFavoritesBookMarksIcon[]" id="btPcShooterChListFavoritesBookMarksIcon_' + i + '" value="' + showImg + '" />';
-        fstr += '<div class="formentry">' + title + '<input class="ccm-input-text" type="text" id="btPcShooterChListFavoritesBookMarksText_' + i + '" name="btPcShooterChListFavoritesBookMarksText[]" value="' + l[i].text + '" />' + titleEnd + '</div>';
+        fstr += '<div class="formentry">' + title + '<input class="ccm-input-text" type="text" id="btPcShooterChListFavoritesBookMarksText_' + i + '" name="btPcShooterChListFavoritesBookMarksText[]" value="' + l[i].btPcShooterChListFavoritesBookMarksText + '" />' + titleEnd + '</div>';
         if (l[i].isLink) {
-            fstr += '<div class="formentry"><input type="text" id="btPcShooterChListFavoritesBookMarksDate_' + i + '" name="btPcShooterChListFavoritesBookMarksDate[]" value="' + l[i].dateAdded + '" /></div>';
-            fstr += '<div class="formentry"><input type="text" id="btPcShooterChListFavoritesBookMarksUrl_' + i + '" name="btPcShooterChListFavoritesBookMarksUrl[]" value="' + l[i].url + '" /></div>';
-            fstr += '<div class="formentry"><input type="button" name="testbookmark_' + i + '" class="testbookmark" id="' + ajaxCall + '_' + l[i].url + '" value="' + ccm_t('test-link') + '" /></div>';
+            fstr += '<div class="formentry"><input type="text" id="btPcShooterChListFavoritesBookMarksDate_' + i + '" name="btPcShooterChListFavoritesBookMarksDate[]" value="' + l[i].btPcShooterChListFavoritesBookMarksDate + '" /></div>';
+            fstr += '<div class="formentry"><input type="text" id="btPcShooterChListFavoritesBookMarksUrl_' + i + '" name="btPcShooterChListFavoritesBookMarksUrl[]" value="' + l[i].btPcShooterChListFavoritesBookMarksUrl + '" /></div>';
+            fstr += '<div class="formentry"><input type="button" name="testbookmark_' + i + '" class="testbookmark" id="' + ajaxCall + '_' + l[i].btPcShooterChListFavoritesBookMarksUrl + '" value="' + ccm_t('test-link') + '" /></div>';
             fstr += '<div id="showerrors_' + i +'" class="formentry"></div>';
         } else {
             fstr += '<div class="formentry"><input type="hidden" id="btPcShooterChListFavoritesBookMarksDate_' + i + '" name="btPcShooterChListFavoritesBookMarksDate[]" value="" /></div>';
