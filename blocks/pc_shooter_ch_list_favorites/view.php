@@ -5,8 +5,8 @@ echo '<pre>btPcShooterChListFavoritesBlockText: ';
 echo $btPcShooterChListFavoritesBlockText;
 echo '<hr>bID: ';
 echo $bID;
-echo '<hr>soUndSo: ';
-foreach($soUndSo as $key => $val){
+echo '<hr>bookMarkData: ';
+foreach($bookMarkData as $key => $val){
     echo 'key: '.$key;
     echo '<br>val: '.print_r($val).'<hr>';
 }

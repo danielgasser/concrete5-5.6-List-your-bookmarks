@@ -50,6 +50,8 @@ $(document).ready(function () {
         e.preventDefault();
         ccm_blockWindowClose();
     })
+    window.console.log('---------------');
+    window.console.log(jDt);
 })
 
 /**

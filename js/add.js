@@ -4,14 +4,16 @@
  * Date: 21.09.13
  * Time: 09:42
  */
+
+
 $(document).ready(function(){
     "use strict";
     var formValue = {};
 
+
     $('#thafile').change(function(e){
         formValue = parseHtml(e.target.files);
     })
-
 
 })
 

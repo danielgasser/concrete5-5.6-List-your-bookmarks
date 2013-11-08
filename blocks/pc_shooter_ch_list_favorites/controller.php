@@ -52,7 +52,7 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
     public function edit(){
         $db = Loader::db();
         $this->set_package_tool('check_url');
-        $this->set('soUndSo', $db->GetAll('SELECT * FROM ' . $this->bookmarkTable . ' WHERE ' . $this->bookmarkTableForeignKeyField . ' = ' . $this->bID));
+        $this->set('bookMarkData', $db->GetAll('SELECT * FROM ' . $this->bookmarkTable . ' WHERE ' . $this->bookmarkTableForeignKeyField . ' = ' . $this->bID));
     }
 
     public function validate($args) {
@@ -84,7 +84,7 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
     public function view() {
         Database::setDebug(true);
         $db = Loader::db();
-        $this->set('soUndSo', $db->GetAll('SELECT * FROM ' . $this->bookmarkTable . ' WHERE ' . $this->bookmarkTableForeignKeyField . ' = ' . $this->bID));
+        $this->set('bookMarkData', $db->GetAll('SELECT * FROM ' . $this->bookmarkTable . ' WHERE ' . $this->bookmarkTableForeignKeyField . ' = ' . $this->bID));
     }
 
     public function on_start() {
