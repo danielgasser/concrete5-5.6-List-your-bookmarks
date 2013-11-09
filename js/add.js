@@ -11,7 +11,7 @@ $(document).ready(function(){
     var formValue = {};
 
 
-    $('#thafile').change(function(e){
+    jQUSel_ThaFile.change(function(e){
         formValue = parseHtml(e.target.files);
     })
 
@@ -23,25 +23,26 @@ $(document).ready(function(){
  */
 parseHtml = function (ev) {
     if (window.File && window.FileReader && window.FileList && window.Blob) {
-        f = ev[0];
+        var f = ev[0];
         if (f) {
             var r = new FileReader();
             r.onload = function (e) {
                 contents = e.target.result;
-                $('#showFile').html(contents);
-                $('#showFile').hide();
+                jQUSel_ShowFile.html(contents);
+                jQUSel_ShowFile.hide();
                 getLinks();
             };
             r.readAsText(f);
-            $('#showFile').html('');
+            jQUSel_ShowFile.html('');
         }
     } else {
+        window.alert('ie9')
         //TODO error messages
     }
 };
 
 /**
- * Gets the dt>h3 and dt>a elements from ('#showFile')
+ * Gets the dt>h3 and dt>a elements from ('#jQUSel_ShowFile')
  * into a javascript object
  */
 getLinks = function () {
@@ -132,11 +133,11 @@ createForm = function (l) {
         }
         fstr += '</div>';
         fstr += '<div class="break"></div>';
-        $('#editBookmarks').append(fstr);
+        jQUSel_EditBookMarks.append(fstr);
         fstr = '';
         urlChange = document.getElementById('btPcShooterChListFavoritesBookMarksUrl_' + i);
         urlChange.addEventListener('change', function(){updateTestbookMarkValue($(this).val(), $(this).attr('id').split('_')[1]), false});
     }
-    $('#editBookmarks').append('<input type="hidden" name="numRecords" id="numRecords" value="' + l.length + '">');
+    jQUSel_EditBookMarks.append('<input type="hidden" name="numRecords" id="numRecords" value="' + l.length + '">');
 }
 

@@ -23,7 +23,6 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
 
     public function getPkgHandle() {
         return BlockType::getByHandle($this->btHandle)->getPackageHandle();
-
     }
 
     public function getJavaScriptStrings() {
@@ -47,12 +46,16 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
 
     public function add(){
         $this->set_package_tool('check_url');
+        $this->set_package_tool('upload_html');
+        $this->set('pkgHandle',$this->getPkgHandle());
     }
 
     public function edit(){
         $db = Loader::db();
         $this->set_package_tool('check_url');
+        $this->set_package_tool('upload_html');
         $this->set('bookMarkData', $db->GetAll('SELECT * FROM ' . $this->bookmarkTable . ' WHERE ' . $this->bookmarkTableForeignKeyField . ' = ' . $this->bID));
+        $this->set('pkgHandle',$this->getPkgHandle());
     }
 
     public function validate($args) {
@@ -89,8 +92,8 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
 
     public function on_start() {
         $html = Loader::helper('html');
-        $this->addHeaderItem($html->css(BASE_URL . DIR_REL . '/' . DIRNAME_PACKAGES . '/' . self::getPkgHandle() . '/css/add.css'));
-        $this->addHeaderItem($html->javascript(BASE_URL . DIR_REL . '/' . DIRNAME_PACKAGES . '/' . self::getPkgHandle() . '/js/add.js'));
+        $this->addHeaderItem($html->css(BASE_URL . DIR_REL . '/' . DIRNAME_PACKAGES . '/' .$this->getPkgHandle() . '/css/add.css'));
+        $this->addHeaderItem($html->javascript(BASE_URL . DIR_REL . '/' . DIRNAME_PACKAGES . '/' .$this->getPkgHandle() . '/js/add.js'));
     }
 
     /**
@@ -126,7 +129,7 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
     private function set_package_tool($tool_name)
     {
         $tool_helper = Loader::helper('concrete/urls');
-        $this->set($tool_name, $tool_helper->getToolsURL($tool_name, $this->getPkgHandle()));
+        $this->set($tool_name, $tool_helper->getToolsURL($tool_name . '?pkgHanlde=' . $this->getPkgHandle(), $this->getPkgHandle()));
     }
 
     /**

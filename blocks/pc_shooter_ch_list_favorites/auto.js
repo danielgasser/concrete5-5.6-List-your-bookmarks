@@ -4,6 +4,7 @@ $(document).ready(function () {
     var jDt = {};
 
 
+   // $('#tabset').tabs();
     $('#tabset a').click(function (ev) {
         var tab_to_show = $(this).attr('href');
         $('#tabset li').
@@ -19,16 +20,16 @@ $(document).ready(function () {
     }).first().click();
 
 
-    $('[id^="seeErrors_"]').live('click', function () {
+    $('[id^="' + BTStr_seeErrors + '"]').live('click', function () {
         var entryId = $(this).attr('id').split('_')[1],
-            instance = $('[name="testbookmark_' + entryId + '"]'),
+            instance = $('[name="' + BTStr_checkUrl + '' + entryId + '"]'),
             data = instance.attr('id').split('__'),
             ref = $('#btPcShooterChListFavoritesBookMarksUrl_' + entryId).val();
-        jDt = checkBookMark(data, instance);
+        //jDt = checkBookMark(data, instance);
         loadUrlErrorDialog(jDt, ref);
     })
 
-    $('[name^="testbookmark_"]').live('click', function (e) {
+    $('[name^="' + BTStr_checkUrl + '"]').live('click', function (e) {
         e.preventDefault();
         var instance= this,
             data = $(this).attr('id').split('__');
@@ -67,10 +68,6 @@ checkBookMark = function (valData, instance){
         jData = {};
     d = valData.splice(valData.length - 1, 1)
     goto = valData.join('_');
-    window.console.log('goto')
-    window.console.log(goto)
-    window.console.log('ref')
-    window.console.log(ref)
     $.ajax({
         type: 'POST',
         async: false,
@@ -92,13 +89,14 @@ checkBookMark = function (valData, instance){
          *
          */
         success: function (data) {
-            window.console.log(data)
             var errorText = '',
                 isNull = (data === 'false') ? true : false,
                 urlValid = false,
                 counter = null;
             jData = $.parseJSON(data);
             $.each(jData, function(i, n){
+                goto = valData.join('i');
+                window.console.log(i);
                 if (isNull) {
                     urlValid = null;
                     //return false;
@@ -128,7 +126,7 @@ checkBookMark = function (valData, instance){
 displayUrlCheck = function (instance, check) {
     var c = $(instance).attr('name').split('_')[1],
         errorEl = (c !== null) ? $('#showerrors_' + c) : $(''),
-        errorButton = (c !== null) ? '<div class="formentry" style="float: right;" id="cE' + c + '"><input id="seeErrors_' + c + '" type="button" value="' + ccm_t('see-errors') + '" />' : '';
+        errorButton = (c !== null) ? '<div class="formentry" style="float: right;" id="cE' + c + '"><input id="' + BTStr_seeErrors + '' + c + '" type="button" value="' + ccm_t('see-errors') + '" />' : '';
 
     switch (check) {
         case null:
@@ -177,7 +175,7 @@ createDialogElement = function (data) {
  * @param index
  */
 updateTestbookMarkValue = function (el, index) {
-    $('[name="testbookmark_' + index + '"]').attr('id', ajaxCall + '__' + el);
+    $('[name="' + BTStr_checkUrl + '' + index + '"]').attr('id', ajaxCall + '__' + el);
 }
 
 
@@ -197,7 +195,7 @@ loadUrlErrorDialog = function (obj, ref) {
 }
 
 ccmValidateBlockForm = function() {
-    var fileArr = $('#thafile').val().split('.'),
+    var fileArr = jQUSel_ThaFile.val().split('.'),
         fileExt = fileArr[fileArr.length - 1],
         countErrors = 0;
     if (!/\b(htm|html)\b/i.test(fileExt)) {
