@@ -4,7 +4,7 @@
 /**
  * Class PcShooterChListFavoritesBlockController
  */
-class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block_File {
+class PcShooterChListFavoritesBlockController extends BlockController {
     protected $btName = "List Your Bookmarks";
     protected $btTable = 'btPcShooterChListFavorites';
     protected $btInterfaceWidth = 960;
@@ -12,6 +12,7 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
     protected $bookmarkTable = 'btPcShooterChListFavoritesBookMarks';
     protected $bookmarkTableForeignKeyField = 'blockID';
 
+    public $blankImage = 'data:image / gif;base64,R0lGODlhAQABAAD / ACwAAAAAAQABAAACADs % 3D';
 
     public function getBlockTypeName() {
         return t("Bookmark Block(s)");
@@ -47,15 +48,15 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
     public function add(){
         $this->set_package_tool('check_url');
         $this->set_package_tool('upload_html');
-        $this->set('pkgHandle',$this->getPkgHandle());
+        $this->set('blankImage', $this->blankImage);
     }
 
     public function edit(){
         $db = Loader::db();
         $this->set_package_tool('check_url');
         $this->set_package_tool('upload_html');
+        $this->set('blankImage', $this->blankImage);
         $this->set('bookMarkData', $db->GetAll('SELECT * FROM ' . $this->bookmarkTable . ' WHERE ' . $this->bookmarkTableForeignKeyField . ' = ' . $this->bID));
-        $this->set('pkgHandle',$this->getPkgHandle());
     }
 
     public function validate($args) {
@@ -104,7 +105,7 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
      * A query string for 1 INSERT query with (val,val,...), (val,val,...), (val,val,...)
      * is created here.
      */
-    private function createQueryString($args){
+    private function createQueryString($args) {
         $valuesStr = '';
         foreach($args as $val){
             $valuesStr .= '(' . $this->bID . ', ';
@@ -126,10 +127,9 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
         return $valuesStr;
     }
 
-    private function set_package_tool($tool_name)
-    {
+    private function set_package_tool($tool_name) {
         $tool_helper = Loader::helper('concrete/urls');
-        $this->set($tool_name, $tool_helper->getToolsURL($tool_name . '?pkgHanlde=' . $this->getPkgHandle(), $this->getPkgHandle()));
+        $this->set($tool_name, $tool_helper->getToolsURL($tool_name . '?pkgHandle=' . $this->getPkgHandle() . '&bID=' . $this->bID . '&bImg=' . $this->blankImage, $this->getPkgHandle()));
     }
 
     /**
@@ -139,8 +139,7 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
      * @param $args: Posted values
      * @return string: The VALUES - part of the query-string
      */
-    private function transformPosts($args)
-    {
+    private function transformPosts($args) {
         $queryStr = 'INSERT INTO ' . $this->bookmarkTable . ' (' . $this->bookmarkTableForeignKeyField . ', ';
         $counterFields = 0;
         $ret = array();
@@ -162,5 +161,11 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
         $ret[0] = $finalArr;
         $ret[1] = $queryStr;
         return $ret;
+    }
+
+    public function getBookmarkTableColumnsNames() {
+        $db = Loader::db();
+        $query = "SELECT ORDINAL_POSITION, COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='" . $this->bookmarkTable . "' AND COLUMN_NAME LIKE '" . $this->bookmarkTable . "%'";
+        return $db->GetAssoc($query);
     }
 }

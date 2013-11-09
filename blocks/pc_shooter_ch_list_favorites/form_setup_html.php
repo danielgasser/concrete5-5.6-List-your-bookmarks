@@ -9,9 +9,6 @@ $form = Loader::helper('form');
 $ah = Loader::helper('concrete/interface');
 
 $includeAssetLibrary = true;
-if ($controller->getFileID() > 0) {
-    $bf = $controller->getFileObject();
-}
 ?>
 <ul id="tabset" class="ccm-dialog-tabs">
     <li> <a href="#managebookmarks"><?php echo t("Manage bookmarks"); ?></a></li>
@@ -55,21 +52,25 @@ if ($controller->getFileID() > 0) {
         JQUSel_ThaFile = $('#thafile'),
         jQUSel_EditBookMarks = $('#editBookmarks'),
         BTStr_seeErrors = 'seeErrors_',
-        BTStr_checkUrl = 'testbookmark_';
+        BTStr_checkUrl = 'testbookmark_',
+        BlankImage = '<?php echo $blankImage;  ?>'; // 26 Bytes
 </script>
 
 <div id="managebookmarks">
     <form></form>
-    <form enctype="multipart/form-data" action="<?= $upload_html ?>" method="POST">
-        <input type="hidden" name="pkgHandle" value="<?php echo $controller->getPkgHandle ?>"/>
-        <label for="thafile"><?php echo t('Select bookmark.htm(l)'); ?></label>
-        <input name="thafile" id="thafile" type="file"/>
-        <input type="submit" value="Send File"/>
-
+    <form action="<?= $upload_html ?>" enctype="multipart/form-data" method="POST">
+        <?php
+        echo $form->label('thafile', t('Select bookmark.htm(l)'));
+        echo $form->file('thafile', 'thafile', t('Select bookmark.htm(l)'));
+        echo $form->submit('submit', t('Parse it!'));
+        ?>
+        <!--label for="thafile"><?php echo t('Select bookmark.htm(l)'); ?></label-->
+        <!--input name="thafile" id="thafile" type="file"/-->
+        <!--input type="submit" value="Send File"/-->
     </form>
     <div id="chooseFile">
         <br>
-        
+
 
         <!--input class="ccm-form-fileset" name="thafile" id="thafile" type="file" /-->
     </div>

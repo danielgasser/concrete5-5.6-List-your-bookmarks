@@ -93,7 +93,7 @@ createForm = function (l) {
         urlChange = null,
         oddEven,
         isLink = true,
-        blankImg = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D'; // 26 Bytes
+        blankImg = BlankImage; // 26 Bytes
 
     //TODO in Version 2.0: add icons
     //var fstr = '<div class="formentry"><input type="file" id="btPcShooterChListFavoritesIcon" name="btPcShooterChListFavoritesIcon[]" value="' + l.icon + '" /></div>';
