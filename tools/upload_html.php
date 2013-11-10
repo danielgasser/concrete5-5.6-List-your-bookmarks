@@ -1,7 +1,9 @@
 <?php
 defined('C5_EXECUTE') or die("Access Denied.");
 include('constants.php');
-echo '<pre>';
+$thaFileName = $_GET['thaFileName'];
+$thaFile = $_GET['thaFile'].$thaFileName;
+//exit;
 $b = Block::GetById(intval($_GET['bID']));
 $blankImage = str_replace(' ', '', $_GET['bImg']);
 $bc = new PcShooterChListFavoritesBlockController($b);
@@ -9,7 +11,6 @@ $pkgHandle = mysql_real_escape_string($_GET['pkgHandle']);
 $uploadDir = DIR_BASE . '/files/tmp/' . $pkgHandle;
 $langNoJsLinks = t('No JavaScript-links allowed!');
 $tableColumns = $bc->getBookmarkTableColumnsNames();
-print_r($tableColumns);
 $jsonData = array();
 $newArr = array();
 $oldKey = null;
@@ -50,7 +51,7 @@ if (file_exists($pkgHandle) && is_dir($pkgHandle)) {
 /**
  * Move the uploaded bookmark file check
  */
-$uploadFile = strtolower($uploadDir . '/' . basename($_FILES['thafile']['name']));
+$uploadFile = strtolower($uploadDir . '/' . basename($thaFile));
 if (move_uploaded_file(strtolower($_FILES['thafile']['tmp_name']), $uploadFile)) {
     $jsonData['errorMsg'][] = t('File is valid and has been successfully uploaded to') . ' ' . $uploadDir;//"Datei ist valide und wurde erfolgreich hochgeladen";
 } else {
@@ -63,7 +64,7 @@ if (move_uploaded_file(strtolower($_FILES['thafile']['tmp_name']), $uploadFile))
 $href = '<DT><A HREF=';
 $h3 = '<DT><H3';
 // <a> attributes
-$lm[] = '  LAST_MODIFIED=';
+$lm[] = ' LAST_MODIFIED=';
 $lm[] = ' ADD_DATE=';
 $lm[] = ' ICON=';
 $parseDelimiter = '@||@';
@@ -73,8 +74,9 @@ $parseDelimiter = '@||@';
  */
 $str = str_replace($href, $parseDelimiter, file_get_contents($uploadFile));
 $str = str_replace($h3, $parseDelimiter, $str);
+//$str = strip_tags($str);
 $buffer = explode($parseDelimiter, $str);
-
+//print_r($buffer);
 /**
  * Cut off the first array entry: "Bookmarks"
  */
@@ -103,7 +105,12 @@ while ($i < sizeof($buffer)) {
             $jsonData['errorMsg'][] = $langNoJsLinks;
             $buffer[$i][$j] = $langNoJsLinks;
         }
-        $newArr[$i][$tableColumns[$colSortKeys[$j]]] = $buffer[$i][$j];
+        // Check, if it's a title
+        if (strpos($buffer[$i][$j], '</H3>') !== false) {
+            $newArr[$i][$tableColumns[$colSortKeys[$j]]] = strip_tags('title_' . $buffer[$i][$j]);
+        } else {
+            $newArr[$i][$tableColumns[$colSortKeys[$j]]] = strip_tags($buffer[$i][$j]);
+        }
         $j++;
     }
     $j = 0;
@@ -114,15 +121,11 @@ while ($i < sizeof($buffer)) {
         foreach ($newArr[$i] as $newArrKey => $newArrVal ) {
             $lastKey = $newArrKey;
             if ($newArrKey == $tableValue) {
-                //echo 'thumbsup: ' . $newArrKey . ' == ' . $tableValue . '<br>';
                 $counter++;
                 break;
             }
             else {
-                //echo 'fuckit: ' . $newArrKey . ' NOT ' . $tableValue . '<br>';
                 $counter = 0;
-               //echo '<br>this ist '. $k . 'val: ';
-
                 $val = $newArr[$i][$lastKey];
                 $newKey = $tableValue;
             }
@@ -132,30 +135,16 @@ while ($i < sizeof($buffer)) {
             $e = 'red';
             $newArr[$i][$newKey] = $val;
             $newArr[$i][$lastKey] = $blankImage;
-            //echo 'key(): ' . key($tableColumns);
-            //$newArr[$i][$oldKey] = $newArr[$i][$newKey];
-            //unset($newArr[$i][$oldKey]);
-        }else
+        } else {
             $e = 'black';
+        }
 
-        //$newArr[$i]
-        //echo ' c: '. $tableValue.' : ' . $newArrVal . ' <span style="color: ' . $e . '">' . $counter . '</span><hr>';
         $j++;
     }
-
-    $bufK = array_keys($newArr[$i]);
-    //if (sizeof($buffer[$i]) < sizeof($tableColumns)) {
-    //   // echo 'leeheer!';
-    //    array_push($newArr[2],  'essmpty');
-    //}
-    ////
-
     $i++;
 }
 
-print_r($newArr);
-echo '</pre>';
-
-$jsonData['data'] = $buffer;
+$jsonData['data'] = $newArr;
 // That's it. Send it back to the client
-//echo json_encode($jsonData);
+echo json_encode($jsonData);
+exit;

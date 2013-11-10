@@ -20,6 +20,7 @@ $includeAssetLibrary = true;
 </script>
 <script>
     var ajaxCall = '<?= $check_url; ?>',
+        uploadHtml = '<?= $upload_html; ?>',
         saveForm = '<?php echo $this->action("save_form"); ?>',
         urlChange = null;
     $(document).ready(function () {
@@ -30,21 +31,6 @@ $includeAssetLibrary = true;
                 delete data[i].bookmarkID;
             })
         }
-/*
-
-        if (window.File && window.FileReader && window.FileList && window.Blob) {
-            alert('ja')
-            $('#chooseFile').append('<input class="ccm-form-fileset" name="thafile" id="thafile" type="file" />');
-        } else {
-            alert('nei')
-            $('#chooseFile').append('<form enctype="multipart/form-data" action="<?= $upload_html ?>>" method="POST">' +
-                '<input type="hidden" name="MAX_FILE_SIZE" value="30000" />' +
-                '<input name="thafile" type="file" />' +
-                '<input type="submit" value="Send File" />' +
-                '</form>');
-        }
-
-*/
     })
 
 // ---------------- jQuery Selectors, ID-Strings -----------------
@@ -54,6 +40,7 @@ $includeAssetLibrary = true;
         BTStr_seeErrors = 'seeErrors_',
         BTStr_checkUrl = 'testbookmark_',
         BlankImage = '<?php echo $blankImage;  ?>'; // 26 Bytes
+
 </script>
 
 <div id="managebookmarks">
@@ -62,7 +49,6 @@ $includeAssetLibrary = true;
         <?php
         echo $form->label('thafile', t('Select bookmark.htm(l)'));
         echo $form->file('thafile', 'thafile', t('Select bookmark.htm(l)'));
-        echo $form->submit('submit', t('Parse it!'));
         ?>
         <!--label for="thafile"><?php echo t('Select bookmark.htm(l)'); ?></label-->
         <!--input name="thafile" id="thafile" type="file"/-->

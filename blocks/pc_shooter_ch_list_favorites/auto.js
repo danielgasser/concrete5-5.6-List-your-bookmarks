@@ -3,7 +3,6 @@ $(document).ready(function () {
 
     var jDt = {};
 
-
    // $('#tabset').tabs();
     $('#tabset a').click(function (ev) {
         var tab_to_show = $(this).attr('href');
@@ -19,6 +18,28 @@ $(document).ready(function () {
         return false;
     }).first().click();
 
+    $('#thafile').change(function (e) {
+        window.console.log('$.parseJSON(data)');
+        window.console.log(e.target.files[0]);
+        var jData = [];
+        $.ajax({
+            type: 'GET',
+            async: false,
+            url: uploadHtml,
+            data: {
+                thaFile: e.target.files[0].value,
+                thaFileName: e.target.files[0].name
+            },
+            success: function (data) {
+                jData = $.parseJSON(data);
+                window.console.log(jData);
+                createForm(jData['data']);
+            }
+        });
+        // FILE API REQUIRED
+        // formValue = parseHtml(e.target.files);
+    })
+
 
     $('[id^="' + BTStr_seeErrors + '"]').live('click', function () {
         var entryId = $(this).attr('id').split('_')[1],
@@ -30,6 +51,7 @@ $(document).ready(function () {
     })
 
     $('[name^="' + BTStr_checkUrl + '"]').live('click', function (e) {
+        window.console.log(this);
         e.preventDefault();
         var instance= this,
             data = $(this).attr('id').split('__');

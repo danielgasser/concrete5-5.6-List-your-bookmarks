@@ -12,7 +12,7 @@ class PcShooterChListFavoritesBlockController extends BlockController {
     protected $bookmarkTable = 'btPcShooterChListFavoritesBookMarks';
     protected $bookmarkTableForeignKeyField = 'blockID';
 
-    public $blankImage = 'data:image / gif;base64,R0lGODlhAQABAAD / ACwAAAAAAQABAAACADs % 3D';
+    public $blankImage = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D';
 
     public function getBlockTypeName() {
         return t("Bookmark Block(s)");

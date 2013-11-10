@@ -8,17 +8,12 @@
 
 $(document).ready(function(){
     "use strict";
-    var formValue = {};
-
-
-    jQUSel_ThaFile.change(function(e){
-        formValue = parseHtml(e.target.files);
-    })
 
 })
 
 /**
  * Adds the chosen bookmark-file to a dom element (#showFile) for further parsing
+ * REQUIRES FILE READER API
  * @param ev: file change-event
  */
 parseHtml = function (ev) {
@@ -88,8 +83,10 @@ createForm = function (l) {
         i,
         numrec = '',
         showImg,
+        titleFlag = 'title_',
         title = '',
         titleEnd = '',
+        replaceTitleText = '',
         urlChange = null,
         oddEven,
         isLink = true,
@@ -97,13 +94,16 @@ createForm = function (l) {
 
     //TODO in Version 2.0: add icons
     //var fstr = '<div class="formentry"><input type="file" id="btPcShooterChListFavoritesIcon" name="btPcShooterChListFavoritesIcon[]" value="' + l.icon + '" /></div>';
+    $('#editBookmarks').html('');
     for (i = 0; i < l.length; i += 1) {
         showImg = (l[i].btPcShooterChListFavoritesBookMarksIcon.length === 0) ? blankImg : l[i].btPcShooterChListFavoritesBookMarksIcon;
-        if (l[i].btPcShooterChListFavoritesBookMarksUrl === '' || l[i].btPcShooterChListFavoritesBookMarksUrl === undefined){
+        if (l[i].btPcShooterChListFavoritesBookMarksText.indexOf(titleFlag) > -1){
+            replaceTitleText = l[i].btPcShooterChListFavoritesBookMarksText.substr(titleFlag.length, l[i].btPcShooterChListFavoritesBookMarksText.length);
             title = '<h3>';
             titleEnd = '</h3>';
             isLink = false;
         } else {
+            replaceTitleText = l[i].btPcShooterChListFavoritesBookMarksText;
             isLink = true;
             title = '';
             titleEnd = '';
@@ -121,7 +121,7 @@ createForm = function (l) {
             fstr += '<div class="formentry"><img name="icon" id="icon" src="' + showImg + '" /></div>';
         }
         fstr += '<input type="hidden" name="btPcShooterChListFavoritesBookMarksIcon[]" id="btPcShooterChListFavoritesBookMarksIcon_' + i + '" value="' + showImg + '" />';
-        fstr += '<div class="formentry">' + title + '<input class="ccm-input-text" type="text" id="btPcShooterChListFavoritesBookMarksText_' + i + '" name="btPcShooterChListFavoritesBookMarksText[]" value="' + l[i].btPcShooterChListFavoritesBookMarksText + '" />' + titleEnd + '</div>';
+        fstr += '<div class="formentry">' + title + '<input class="ccm-input-text" type="text" id="btPcShooterChListFavoritesBookMarksText_' + i + '" name="btPcShooterChListFavoritesBookMarksText[]" value="' + replaceTitleText + '" />' + titleEnd + '</div>';
         if (isLink) {
             fstr += '<div class="formentry"><input type="text" id="btPcShooterChListFavoritesBookMarksDate_' + i + '" name="btPcShooterChListFavoritesBookMarksDate[]" value="' + l[i].btPcShooterChListFavoritesBookMarksDate + '" /></div>';
             fstr += '<div class="formentry"><input type="text" id="btPcShooterChListFavoritesBookMarksUrl_' + i + '" name="btPcShooterChListFavoritesBookMarksUrl[]" value="' + l[i].btPcShooterChListFavoritesBookMarksUrl + '" /></div>';
