@@ -15,6 +15,7 @@ $jsonData = array();
 $newArr = array();
 $oldKey = null;
 $newKey = null;
+$dateFormat = $bc->getDateFormat();
 /**
  * Sort $tableColumns like $buffer:
  * Using $db->getAssoc,
@@ -110,6 +111,14 @@ while ($i < sizeof($buffer)) {
             $newArr[$i][$tableColumns[$colSortKeys[$j]]] = strip_tags('title_' . $buffer[$i][$j]);
         } else {
             $newArr[$i][$tableColumns[$colSortKeys[$j]]] = strip_tags($buffer[$i][$j]);
+        }
+        // Set a formatted date from timestamp
+        if ($tableColumns[$colSortKeys[$j]] == 'btPcShooterChListFavoritesBookMarksDate') {
+            //Log::addEntry($tableColumns[$colSortKeys[$j]]);
+            $dtStr = date($dateFormat, intval($buffer[$i][$j]));
+            Log::addEntry($dateFormat);
+            Log::addEntry($dtStr);
+            $newArr[$i][$tableColumns[$colSortKeys[$j]]] = $dtStr;
         }
         $j++;
     }

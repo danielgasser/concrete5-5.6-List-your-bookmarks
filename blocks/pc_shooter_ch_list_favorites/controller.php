@@ -14,6 +14,7 @@ class PcShooterChListFavoritesBlockController extends BlockController {
 
     public $blankImage = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D';
 
+    public $l;
     public function getBlockTypeName() {
         return t("Bookmark Block(s)");
     }
@@ -41,26 +42,37 @@ class PcShooterChListFavoritesBlockController extends BlockController {
             'num-records' => t('Entries'),
             'close' => t('Close'),
             'print' => t('Print'),
-            'copy' => t('Copy')
+            'copy' => t('Copy'),
+            'meta-icon' => t('Icon'),
+            'meta-title' => t('Title'),
+            'meta-date' => t('Date'),
+            'meta-url' => t('WWW'),
+            'meta-check' => t('Test bookmark.'),
+            'meta-errors' => t('See header details.'),
+            'meta-delete' => t('Delete')
         );
     }
 
+    public function validate($args){
+        return;
+    }
     public function add(){
-        $this->set_package_tool('check_url');
-        $this->set_package_tool('upload_html');
+        $this->set_package_tool('check_url', '');
+        $this->set_package_tool('upload_html', '?pkgHandle=' . $this->getPkgHandle() . '&bID=' . $this->bID . '&bImg=' . $this->blankImage);
         $this->set('blankImage', $this->blankImage);
     }
 
     public function edit(){
         $db = Loader::db();
-        $this->set_package_tool('check_url');
-        $this->set_package_tool('upload_html');
+        $this->set_package_tool('check_url', '');
+        $this->set_package_tool('upload_html', '?pkgHandle=' . $this->getPkgHandle() . '&bID=' . $this->bID . '&bImg=' . $this->blankImage);
         $this->set('blankImage', $this->blankImage);
         $this->set('bookMarkData', $db->GetAll('SELECT * FROM ' . $this->bookmarkTable . ' WHERE ' . $this->bookmarkTableForeignKeyField . ' = ' . $this->bID));
     }
 
-    public function validate($args) {
-        return;
+
+    public function getDateFormat() {
+        return t('Y-m-d');
     }
 
     /**
@@ -72,7 +84,7 @@ class PcShooterChListFavoritesBlockController extends BlockController {
      * @param array $args
      */
     public function save($args){
-        Database::setDebug(false);
+        Database::setDebug(true);
         $db = Loader::db();
         $keyArr = array();
 
@@ -82,6 +94,7 @@ class PcShooterChListFavoritesBlockController extends BlockController {
         $newArgs = self::transformPosts($args);
         $queryStr = $newArgs[1];
         $queryStr .= self::createQueryString($newArgs[0]);
+        //print $queryStr;
         $db->Execute($queryStr);
     }
 
@@ -110,6 +123,7 @@ class PcShooterChListFavoritesBlockController extends BlockController {
         foreach($args as $val){
             $valuesStr .= '(' . $this->bID . ', ';
             foreach($val as $value){
+                //Log::addEntry($value);
                 if (strpos($value, 'data:image') === false){
                     $fieldValue =  mysql_real_escape_string($value);
                     $prefix = '\'';
@@ -127,9 +141,9 @@ class PcShooterChListFavoritesBlockController extends BlockController {
         return $valuesStr;
     }
 
-    private function set_package_tool($tool_name) {
+    private function set_package_tool($tool_name, $params) {
         $tool_helper = Loader::helper('concrete/urls');
-        $this->set($tool_name, $tool_helper->getToolsURL($tool_name . '?pkgHandle=' . $this->getPkgHandle() . '&bID=' . $this->bID . '&bImg=' . $this->blankImage, $this->getPkgHandle()));
+        $this->set($tool_name, $tool_helper->getToolsURL($tool_name . $params, $this->getPkgHandle()));
     }
 
     /**
@@ -160,6 +174,9 @@ class PcShooterChListFavoritesBlockController extends BlockController {
         $queryStr .= ') VALUES ';
         $ret[0] = $finalArr;
         $ret[1] = $queryStr;
+
+        Log::addEntry($ret[1]);
+
         return $ret;
     }
 

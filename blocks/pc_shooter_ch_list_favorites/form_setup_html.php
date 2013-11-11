@@ -15,23 +15,18 @@ $includeAssetLibrary = true;
     <li><a href="#blockoptions"><?php echo t("Block options"); ?></a></li>
 </ul>
 <script>
-    var data = [];
-    data = <?= json_encode($bookMarkData) ?>;
-</script>
-<script>
-    var ajaxCall = '<?= $check_url; ?>',
+    var data = [],
+        ajaxCall = '<?= $check_url; ?>',
         uploadHtml = '<?= $upload_html; ?>',
         saveForm = '<?php echo $this->action("save_form"); ?>',
         urlChange = null;
-    $(document).ready(function () {
-        //data = $.parseJSON(data);
-        if (data !== null){
-            $.each(data, function (i, n) {
-                delete data[i].blockID;
-                delete data[i].bookmarkID;
-            })
-        }
-    })
+    data = <?= json_encode($bookMarkData) ?>;
+    if (data !== null) {
+        $.each(data, function (i, n) {
+            delete data[i].blockID;
+            delete data[i].bookmarkID;
+        })
+    }
 
 // ---------------- jQuery Selectors, ID-Strings -----------------
     var jQUSel_ShowFile = $('#showFile'),
@@ -44,8 +39,6 @@ $includeAssetLibrary = true;
 </script>
 
 <div id="managebookmarks">
-    <form></form>
-    <form action="<?= $upload_html ?>" enctype="multipart/form-data" method="POST">
         <?php
         echo $form->label('thafile', t('Select bookmark.htm(l)'));
         echo $form->file('thafile', 'thafile', t('Select bookmark.htm(l)'));
@@ -53,7 +46,6 @@ $includeAssetLibrary = true;
         <!--label for="thafile"><?php echo t('Select bookmark.htm(l)'); ?></label-->
         <!--input name="thafile" id="thafile" type="file"/-->
         <!--input type="submit" value="Send File"/-->
-    </form>
     <div id="chooseFile">
         <br>
 

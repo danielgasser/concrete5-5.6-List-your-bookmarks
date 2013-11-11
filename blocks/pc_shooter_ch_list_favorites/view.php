@@ -1,4 +1,4 @@
-<?php   defined('C5_EXECUTE') or die("Access Denied.");
+<?php defined('C5_EXECUTE') or die("Access Denied.");
 echo '<div style="border: 1px solid #66aa33">';
 echo '<pre>btPcShooterChListFavoritesBlockText: ';
 //$my = $controller->getbtPcShooterChListFavoritesBlockText();

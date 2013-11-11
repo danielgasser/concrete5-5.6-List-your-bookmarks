@@ -28,6 +28,9 @@
 }
 form .formentry {
     float: left;
+    width: 16%;
+}
+form .formentry-icon {
     width: auto;
 }
 form .formentry img{
@@ -42,10 +45,14 @@ form .links-form {
     float: left;
     width: 100%;
 }
-form .odd {
+form .meta-data {
+    background: white;
+    font-weight: bold;
+}
+form .even {
     background: #d4d4d4;
 
-}form .even {
+}form .odd {
     background: #a9a9a9;
 }
 #btPcShooterChListFavoritesUrl {
