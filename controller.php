@@ -29,26 +29,17 @@ class PcShooterChListFavoritesPackage extends Package {
 
     public function install() {
         $pkg = parent::install();
-        $db = Loader::db();
-        $queryFKey = 'ALTER TABLE btPcShooterChListFavoritesBookMarks
-                        ADD CONSTRAINT blockID
-                        FOREIGN KEY fbID (blockID)
-                        REFERENCES btPcShooterChListFavorites (bID)
-                        ON DELETE CASCADE
-                        ON UPDATE CASCADE';
-
         BlockType::installBlockTypeFromPackage($this->pkgHandle, $pkg);
-        //$db->Execute($queryFKey);
     }
     public function uninstall() {
+        parent::uninstall();
         $db = Loader::db();
         $schema = Database::getADOSchema();
-        $sql = $schema->RemoveSchema('db.xml');
         $schema->RemoveSchema('db.xml');
-        $db->Execute('alter table btPcShooterChListFavoritesBookMarks drop foreign key blockID');
+        $schema->RemoveSchema('db.xml');
+        //$db->Execute('alter table btPcShooterChListFavoritesBookMarks drop foreign key blockID');
         $db->Execute('drop table if exists btPcShooterChListFavorites');
         $db->Execute('drop table if exists btPcShooterChListFavoritesBookMarks');
-        parent::uninstall();
     }
 
 

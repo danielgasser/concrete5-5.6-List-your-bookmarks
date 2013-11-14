@@ -3,19 +3,21 @@
 	<table name="btPcShooterChListFavorites">
 		<field name="bID" type="I">
             <key />
-			<unsigned/>
+			<unsigned />
 		</field>
         <field name="btPcShooterChListFavoritesBlockText" type="C" size="255">
         </field>
         <field name="btPcShooterChListFavoritesBlockMultiBlock" type="C" size="255">
         </field>
-
+        <field name="fID" type="I">
+            <unsigned/>
+        </field>
     </table>
     <table name="btPcShooterChListFavoritesBookMarks">
         <field name="bookmarkID" type="I">
             <key />
-            <AUTOINCREMENT/>
-            <unsigned/>
+            <AUTOINCREMENT />
+            <unsigned />
         </field>
         <field name="blockID" type="I">
             <unsigned/>

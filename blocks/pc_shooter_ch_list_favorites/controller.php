@@ -4,7 +4,7 @@
 /**
  * Class PcShooterChListFavoritesBlockController
  */
-class PcShooterChListFavoritesBlockController extends BlockController {
+class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block_File {
     protected $btName = "List Your Bookmarks";
     protected $btTable = 'btPcShooterChListFavorites';
     protected $btInterfaceWidth = 960;
@@ -13,8 +13,8 @@ class PcShooterChListFavoritesBlockController extends BlockController {
     protected $bookmarkTableForeignKeyField = 'blockID';
 
     public $blankImage = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D';
+    public $bookMarkData = array();
 
-    public $l;
     public function getBlockTypeName() {
         return t("Bookmark Block(s)");
     }
@@ -25,6 +25,12 @@ class PcShooterChListFavoritesBlockController extends BlockController {
 
     public function getPkgHandle() {
         return BlockType::getByHandle($this->btHandle)->getPackageHandle();
+    }
+
+    public function getBookmarkTableColumnsNames() {
+        $db = Loader::db();
+        $query = "SELECT ORDINAL_POSITION, COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='" . $this->bookmarkTable . "' AND COLUMN_NAME LIKE '" . $this->bookmarkTable . "%'";
+        return $db->GetAssoc($query);
     }
 
     public function getJavaScriptStrings() {
@@ -52,137 +58,132 @@ class PcShooterChListFavoritesBlockController extends BlockController {
             'meta-delete' => t('Delete')
         );
     }
-
-    public function validate($args){
-        return;
-    }
-    public function add(){
-        $this->set_package_tool('check_url', '');
-        $this->set_package_tool('upload_html', '?pkgHandle=' . $this->getPkgHandle() . '&bID=' . $this->bID . '&bImg=' . $this->blankImage);
-        $this->set('blankImage', $this->blankImage);
-    }
-
-    public function edit(){
+    public function setBookmarkData($args) {
         $db = Loader::db();
-        $this->set_package_tool('check_url', '');
-        $this->set_package_tool('upload_html', '?pkgHandle=' . $this->getPkgHandle() . '&bID=' . $this->bID . '&bImg=' . $this->blankImage);
-        $this->set('blankImage', $this->blankImage);
-        $this->set('bookMarkData', $db->GetAll('SELECT * FROM ' . $this->bookmarkTable . ' WHERE ' . $this->bookmarkTableForeignKeyField . ' = ' . $this->bID));
+        $db->Execute('DELETE FROM ' . $this->bookmarkTable . ' WHERE ISNULL(' . $this->bookmarkTableForeignKeyField . ')');
+        $db->Execute($this->createInsertBookmarksQuery($args));
     }
 
+    public function createInsertBookmarksQuery($args)
+    {
+        $queryStr = 'INSERT INTO ' . $this->bookmarkTable . ' (' . $this->bookmarkTableForeignKeyField . ', ';
+        $queryStr .= implode(', ', array_keys($args[0]));
+        $queryStr .= ') VALUES ';
+
+        foreach ($args as $arg) {
+            $queryStr .= '(' . PHP_INT_MAX . ', ';
+            foreach ($arg as $value) {
+                $queryStr .= '\'' . $value . '\', ';
+            }
+            $queryStr = substr($queryStr, 0, -2);
+            $queryStr .= '), ';
+        }
+        $queryStr = substr($queryStr, 0, -2);
+
+        return $queryStr;
+    }
+
+    public function getBookmarkData(){
+
+        return $this->bookMarkData;
+    }
+    public function view() {
+        $this->clearHtmlExtension($this->getPkgHandle());
+        $this->set('bookMarkData', $this->bookMarkData);
+    }
+
+    public function clearHtmlExtension($pkg) {
+        $co = new Config();
+        $co->setPackageObject($pkg);
+        $co->clear('UPLOAD_FILE_EXTENSIONS_CONFIGURABLE');
+        $co->clear('UPLOAD_FILE_EXTENSIONS_ALLOWED');
+    }
+
+    private function setHtmlExtension() {
+        $co = new Config();
+        $co->setPackageObject($this->getPkgHandle());
+        $co->save('UPLOAD_FILE_EXTENSIONS_CONFIGURABLE', true);
+        $co->save('UPLOAD_FILE_EXTENSIONS_ALLOWED', '*.htm;*.html;');
+    }
+
+    public function save($args) {
+        $db = Loader::db();
+        parent::save($args);
+        $this->clearHtmlExtension($this->getPkgHandle());
+        Database::setDebug(false);
+        Log::addEntry('UPDATE ' . $this->bookmarkTable . ' SET ' . $this->bookmarkTableForeignKeyField . ' = ' . $this->bID . ' WHERE ' . $this->bookmarkTableForeignKeyField . ' = ' . PHP_INT_MAX);
+        $db->Execute('UPDATE ' . $this->bookmarkTable . ' SET ' . $this->bookmarkTableForeignKeyField . ' = ' . $this->bID . ' WHERE ' . $this->bookmarkTableForeignKeyField . ' = ' . PHP_INT_MAX);
+    }
+
+    public function delete() {
+        $db = Loader::db();
+        parent::delete();
+        $db->Execute('DELETE FROM ' . $this->bookmarkTable . ' WHERE ' . $this->bookmarkTableForeignKeyField . ' = ' . $this->bID);
+    }
+
+    public function validate($args) {
+        $e = Loader::helper('validation/error');
+        if ($args['fID'] < 1) {
+            $e->add(t('You must select a file.'));
+        }
+        if (trim($args['fileLinkText']) == '') {
+            $e->add(t('You must give your file a link.'));
+        }
+
+        return $e;
+    }
+
+    public function add() {
+        $this->set_package_tool('upload_html');
+        $this->setHtmlExtension();
+        $this->set('blankImage', $this->blankImage);
+        $this->set('bookMarkData', $this->bookMarkData);
+    }
+
+    public function edit() {
+        $this->set_package_tool('upload_html');
+        $this->setHtmlExtension();
+        $this->set('blankImage', $this->blankImage);
+    }
 
     public function getDateFormat() {
+
         return t('Y-m-d');
     }
 
-    /**
-     * Calls the parent save method.
-     * Reconstructs the posted multiple-fields
-     * into an db-query string
-     * and saves it into $this->bookmarkTable
-     *
-     * @param array $args
-     */
-    public function save($args){
-        Database::setDebug(true);
-        $db = Loader::db();
-        $keyArr = array();
+    function getFileObject() {
 
-        $keyArr[] = $this->bookmarkTableForeignKeyField;
-
-        parent::save($args);
-        $newArgs = self::transformPosts($args);
-        $queryStr = $newArgs[1];
-        $queryStr .= self::createQueryString($newArgs[0]);
-        //print $queryStr;
-        $db->Execute($queryStr);
+        return File::getByID($this->fID);
     }
 
-    public function view() {
-        Database::setDebug(true);
-        $db = Loader::db();
-        $this->set('bookMarkData', $db->GetAll('SELECT * FROM ' . $this->bookmarkTable . ' WHERE ' . $this->bookmarkTableForeignKeyField . ' = ' . $this->bID));
-    }
-
-    public function on_start() {
-        $html = Loader::helper('html');
-        $this->addHeaderItem($html->css(BASE_URL . DIR_REL . '/' . DIRNAME_PACKAGES . '/' .$this->getPkgHandle() . '/css/add.css'));
-        $this->addHeaderItem($html->javascript(BASE_URL . DIR_REL . '/' . DIRNAME_PACKAGES . '/' .$this->getPkgHandle() . '/js/add.js'));
-    }
-
-    /**
-     * Create query string
-     * Reason: A 2-dimensional array is passed
-     *      With a lot of records, the ADOB query() method
-     *      sends too much queries.
-     * A query string for 1 INSERT query with (val,val,...), (val,val,...), (val,val,...)
-     * is created here.
-     */
-    private function createQueryString($args) {
-        $valuesStr = '';
-        foreach($args as $val){
-            $valuesStr .= '(' . $this->bID . ', ';
-            foreach($val as $value){
-                //Log::addEntry($value);
-                if (strpos($value, 'data:image') === false){
-                    $fieldValue =  mysql_real_escape_string($value);
-                    $prefix = '\'';
-                }else {
-                    $fieldValue =  $value;
-                    $prefix = '\'';
-                }
-                $valuesStr .= $prefix . $fieldValue . $prefix . ', ';
+    private function set_block_tool($tool_name, $params) {
+        $i = 0;
+        $parStr = '';
+        if (is_array($params)) {
+            foreach($params as $key => $value) {
+                $prefix = ($i == 0) ? '?' : '&';
+                $parStr .= $prefix . $key . '=' . $value;
+                $i++;
             }
-            $valuesStr = substr($valuesStr, 0,  -2);
-            $valuesStr .= '), ';
         }
-        $valuesStr = substr($valuesStr, 0,  -2);
-
-        return $valuesStr;
+        $tool_helper = Loader::helper('concrete/urls');
+        $bt = BlockType::getByHandle($this->btHandle);
+        $this->set($tool_name, $tool_helper->getBlockTypeToolsURL($bt) . '/' . $tool_name);
     }
 
-    private function set_package_tool($tool_name, $params) {
+    private function set_package_tool($tool_name, $params = '') {
+        $i = 0;
+        $parStr = '';
+        if (is_array($params)) {
+            foreach ($params as $key => $value) {
+                $prefix = ($i == 0) ? '?' : '&';
+                $parStr .= $prefix . $key . '=' . $value;
+                $i++;
+            }
+        }
+
         $tool_helper = Loader::helper('concrete/urls');
         $this->set($tool_name, $tool_helper->getToolsURL($tool_name . $params, $this->getPkgHandle()));
     }
 
-    /**
-     * Creates 2-dimensional array out of 4 1-dimensional ones * number of records (4 form-fields per record)
-     * Array [number of records][number of form-fields]
-     *
-     * @param $args: Posted values
-     * @return string: The VALUES - part of the query-string
-     */
-    private function transformPosts($args) {
-        $queryStr = 'INSERT INTO ' . $this->bookmarkTable . ' (' . $this->bookmarkTableForeignKeyField . ', ';
-        $counterFields = 0;
-        $ret = array();
-        foreach ($args as $key => $val) {
-            if (strpos($key, $this->bookmarkTable) !== false) {
-                $queryStr .= $key . ', ';
-            }
-            if (is_array($val)) {
-                $counterValues = 0;
-                while ($counterValues < sizeof($val)) {
-                    $finalArr[$counterValues][$counterFields] = $val[$counterValues];
-                    $counterValues++;
-                }
-                $counterFields++;
-            }
-        }
-        $queryStr = substr($queryStr, 0, -2);
-        $queryStr .= ') VALUES ';
-        $ret[0] = $finalArr;
-        $ret[1] = $queryStr;
-
-        Log::addEntry($ret[1]);
-
-        return $ret;
-    }
-
-    public function getBookmarkTableColumnsNames() {
-        $db = Loader::db();
-        $query = "SELECT ORDINAL_POSITION, COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='" . $this->bookmarkTable . "' AND COLUMN_NAME LIKE '" . $this->bookmarkTable . "%'";
-        return $db->GetAssoc($query);
-    }
 }

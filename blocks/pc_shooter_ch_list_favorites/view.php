@@ -1,15 +1,25 @@
 <?php defined('C5_EXECUTE') or die("Access Denied.");
-echo '<div style="border: 1px solid #66aa33">';
-echo '<pre>btPcShooterChListFavoritesBlockText: ';
-//$my = $controller->getbtPcShooterChListFavoritesBlockText();
-echo $btPcShooterChListFavoritesBlockText;
-echo '<hr>bID: ';
 echo $bID;
-echo '<hr>bookMarkData: ';
-foreach($bookMarkData as $key => $val){
-    echo 'key: '.$key;
-    echo '<br>val: '.print_r($val).'<hr>';
+echo $btPcShooterChListFavoritesBlockText;
+echo $btPcShooterChListFavoritesBlockMultiBlock;
+$f = $controller->getFileObject();
+$fp = new Permissions($f);
+$bookMarkData = $controller->getBookmarkData();
+
+if ($fp->canViewFile()) {
+    $c = Page::getCurrentPage();
+    if ($c instanceof Page) {
+        $cID = $c->getCollectionID();
+    }
+    ?>
+    <a href="<?php echo View::url('/download_file', $controller->getFileID(), $cID) ?>"><?php echo stripslashes($controller->getLinkText()) ?></a>
+<pre>
+    <?php
+    print_r($bookMarkData);
+    ?>
+</pre>
+<?php
 }
-echo '<hr>btPcShooterChListFavoritesText: ';
-print_r($btPcShooterChListFavoritesText);
-echo '</pre></div>';
+
+$fo = $this->controller->getFileObject();?>
+<a href="<?php echo $fo->getRelativePath()?>"><?php echo  stripslashes($controller->getLinkText()) ?></a>

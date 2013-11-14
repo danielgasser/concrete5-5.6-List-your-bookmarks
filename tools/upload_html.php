@@ -1,14 +1,15 @@
 <?php
 defined('C5_EXECUTE') or die("Access Denied.");
-include('constants.php');
-$thaFileName = $_GET['thaFileName'];
-$thaFile = $_GET['thaFile'].$thaFileName;
+//include('constants.php');
+$fileID = mysql_real_escape_string($_GET['fileID']);
+$pkgHandle = mysql_real_escape_string($_GET['pkg']);
 //exit;
-$b = Block::GetById(intval($_GET['bID']));
-$blankImage = str_replace(' ', '', $_GET['bImg']);
-$bc = new PcShooterChListFavoritesBlockController($b);
-$pkgHandle = mysql_real_escape_string($_GET['pkgHandle']);
-$uploadDir = DIR_BASE . '/files/tmp/' . $pkgHandle;
+//$blankImage = str_replace(' ', '', $_GET['bImg']);
+$bc = new PcShooterChListFavoritesBlockController();
+$file = File::getByID($fileID);
+$fv = $file->getRecentVersion();
+$uploadFile = $fv->getDownloadURL();
+
 $langNoJsLinks = t('No JavaScript-links allowed!');
 $tableColumns = $bc->getBookmarkTableColumnsNames();
 $jsonData = array();
@@ -34,6 +35,7 @@ $colSortKeys = array(6, 3, 4, 5);
 /**
  * Upload directory check
  */
+/*
 if (file_exists($pkgHandle) && is_dir($pkgHandle)) {
     $jsonData['errorMsg'][] = t('Directory') . ' ' . $pkgHandle.' ' . t('exists');
 } else {
@@ -48,17 +50,18 @@ if (file_exists($pkgHandle) && is_dir($pkgHandle)) {
         $jsonData['errorMsg'][] = t('Setting permissions to') . ' ' . '0777' . ' ' . t('on') . ' ' . $pkgHandle . ' ' . t('has failed');
     }
 }
-
+*/
 /**
  * Move the uploaded bookmark file check
  */
+/*
 $uploadFile = strtolower($uploadDir . '/' . basename($thaFile));
 if (move_uploaded_file(strtolower($_FILES['thafile']['tmp_name']), $uploadFile)) {
     $jsonData['errorMsg'][] = t('File is valid and has been successfully uploaded to') . ' ' . $uploadDir;//"Datei ist valide und wurde erfolgreich hochgeladen";
 } else {
     $jsonData['errorMsg'][] = t('Possible file-upload attack') . '!';//"Möglicherweise eine Dateiupload-Attacke";
 }
-
+*/
 /**
  * Search & replace vars
  */
@@ -116,8 +119,6 @@ while ($i < sizeof($buffer)) {
         if ($tableColumns[$colSortKeys[$j]] == 'btPcShooterChListFavoritesBookMarksDate') {
             //Log::addEntry($tableColumns[$colSortKeys[$j]]);
             $dtStr = date($dateFormat, intval($buffer[$i][$j]));
-            Log::addEntry($dateFormat);
-            Log::addEntry($dtStr);
             $newArr[$i][$tableColumns[$colSortKeys[$j]]] = $dtStr;
         }
         $j++;
@@ -153,7 +154,10 @@ while ($i < sizeof($buffer)) {
     $i++;
 }
 
-$jsonData['data'] = $newArr;
-// That's it. Send it back to the client
+$jsonData = $newArr;
+// That's it. Send it back to the client & controller
+$bc->setBookmarkData($newArr);
+
 echo json_encode($jsonData);
+
 exit;
