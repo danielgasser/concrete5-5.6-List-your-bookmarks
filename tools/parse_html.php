@@ -1,10 +1,21 @@
 <?php
+/**
+ * List Your Bookmarks Tool file: parses bookmark file
+ * @author This addon creates a list of indiviual blocks,<br>with your bookmarks in it.
+<ul><li>Export the Bookmarks from your browser(s)</li>
+<li>Import your bookmarks into a list.</li>
+<li>Add a small text and an image to each of the bookmarks.</li>
+<li>Edit each bookmark like any normal block.</li>
+<li>Each whole block is a link to another website.
+ * @version 0.1
+ * @package List Your Bookmarks Tool file: parses bookmark file
+ */
+
+
 defined('C5_EXECUTE') or die("Access Denied.");
-//include('constants.php');
+
 $fileID = mysql_real_escape_string($_GET['fileID']);
 $pkgHandle = mysql_real_escape_string($_GET['pkg']);
-//exit;
-//$blankImage = str_replace(' ', '', $_GET['bImg']);
 $bc = new PcShooterChListFavoritesBlockController();
 $file = File::getByID($fileID);
 $fv = $file->getRecentVersion();
@@ -33,40 +44,12 @@ $dateFormat = $bc->getDateFormat();
 $colSortKeys = array(6, 3, 4, 5);
 
 /**
- * Upload directory check
- */
-/*
-if (file_exists($pkgHandle) && is_dir($pkgHandle)) {
-    $jsonData['errorMsg'][] = t('Directory') . ' ' . $pkgHandle.' ' . t('exists');
-} else {
-    if(!mkdir($pkgHandle, 0777)){
-        $jsonData['errorMsg'][] = t('Directory') . ' (' . $pkgHandle . ') ' . t('creation failed');
-    } else {
-        $jsonData['errorMsg'][] = t('Directory') . ' ' . $pkgHandle . t('successfully created');
-    }
-    if (!chmod($pkgHandle, 0755)) {
-        $jsonData['errorMsg'][] = t('Permissions set to') . ' ' . '0777' . ' ' . t('on') . ' ' . $pkgHandle;
-    } else {
-        $jsonData['errorMsg'][] = t('Setting permissions to') . ' ' . '0777' . ' ' . t('on') . ' ' . $pkgHandle . ' ' . t('has failed');
-    }
-}
-*/
-/**
- * Move the uploaded bookmark file check
- */
-/*
-$uploadFile = strtolower($uploadDir . '/' . basename($thaFile));
-if (move_uploaded_file(strtolower($_FILES['thafile']['tmp_name']), $uploadFile)) {
-    $jsonData['errorMsg'][] = t('File is valid and has been successfully uploaded to') . ' ' . $uploadDir;//"Datei ist valide und wurde erfolgreich hochgeladen";
-} else {
-    $jsonData['errorMsg'][] = t('Possible file-upload attack') . '!';//"Möglicherweise eine Dateiupload-Attacke";
-}
-*/
-/**
  * Search & replace vars
  */
 $href = '<DT><A HREF=';
 $h3 = '<DT><H3';
+$h3a = '</A>';
+$h3e = '</H3>';
 // <a> attributes
 $lm[] = ' LAST_MODIFIED=';
 $lm[] = ' ADD_DATE=';
@@ -78,9 +61,10 @@ $parseDelimiter = '@||@';
  */
 $str = str_replace($href, $parseDelimiter, file_get_contents($uploadFile));
 $str = str_replace($h3, $parseDelimiter, $str);
-//$str = strip_tags($str);
+//$str = str_replace($h3e, $parseDelimiter, $str);
+
 $buffer = explode($parseDelimiter, $str);
-//print_r($buffer);
+
 /**
  * Cut off the first array entry: "Bookmarks"
  */
@@ -111,7 +95,7 @@ while ($i < sizeof($buffer)) {
         }
         // Check, if it's a title
         if (strpos($buffer[$i][$j], '</H3>') !== false) {
-            $newArr[$i][$tableColumns[$colSortKeys[$j]]] = strip_tags('title_' . $buffer[$i][$j]);
+            $newArr[$i][$tableColumns[$colSortKeys[$j]]] = trim(strip_tags('title_' . preg_replace('/[[:cntrl:]]/i', '', $buffer[$i][$j])));
         } else {
             $newArr[$i][$tableColumns[$colSortKeys[$j]]] = strip_tags($buffer[$i][$j]);
         }
@@ -156,8 +140,8 @@ while ($i < sizeof($buffer)) {
 
 $jsonData = $newArr;
 // That's it. Send it back to the client & controller
-$bc->setBookmarkData($newArr);
 
-echo json_encode($jsonData);
+$bc->setBookmarkData($newArr);
+echo json_encode($newArr);
 
 exit;
