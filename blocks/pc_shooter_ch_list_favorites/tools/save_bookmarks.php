@@ -1,6 +1,6 @@
 <?php
 /**
- * List Your Bookmarks Edit block
+ * List Your Bookmarks Tool file: parses bookmark file
  * @author This addon creates a list of indiviual blocks,<br>with your bookmarks in it.
 <ul><li>Export the Bookmarks from your browser(s)</li>
 <li>Import your bookmarks into a list.</li>
@@ -8,10 +8,18 @@
 <li>Edit each bookmark like any normal block.</li>
 <li>Each whole block is a link to another website.
  * @version 0.1
- * @package List Your Bookmarks Edit block
+ * @package List Your Bookmarks Tool file: parses bookmark file
  */
 
 
 defined('C5_EXECUTE') or die("Access Denied.");
+$bc = new PcShooterChListFavoritesBlockController();
 
-$this->inc('form_setup_html.php');
+$bookmarkID = mysql_real_escape_string($_POST['bookmarkID']);
+
+// That's it. Send it back to the client & controller
+
+$result = $bc->updateBookmarksByID($bookmarkID, $_POST['fieldValues']);
+echo json_encode($result);
+
+exit;

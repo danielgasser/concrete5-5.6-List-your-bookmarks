@@ -1,5 +1,6 @@
+<?php
 /**
- * List Your Bookmarks Block controller
+ * List Your Bookmarks Tool file: delete DB-entries without valid block id
  * @author This addon creates a list of indiviual blocks,<br>with your bookmarks in it.
 <ul><li>Export the Bookmarks from your browser(s)</li>
 <li>Import your bookmarks into a list.</li>
@@ -7,12 +8,11 @@
 <li>Edit each bookmark like any normal block.</li>
 <li>Each whole block is a link to another website.
  * @version 0.1
- * @package List Your Bookmarks Block controller
+ * @package List Your Bookmarks Tool file: delete DB-entries without valid block id
  */
 
-#loader {
-    position: absolute;
-    top: 50%;
-    left: 45%;
-    width: 40px;
-}
+defined('C5_EXECUTE') or die("Access Denied.");
+
+$bc = new PcShooterChListFavoritesBlockController();
+$bc->deleteBookmarkRecords(PHP_INT_MAX);
+exit;
