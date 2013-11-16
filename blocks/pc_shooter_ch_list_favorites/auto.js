@@ -57,6 +57,7 @@ createForm = function (l) {
         titleEnd = '',
         replaceTitleText = '',
         oddEven,
+        f,
         isLink = true,
         blankImg = BlankImage,
         jQUSel_EditBookMarks = $('#editBookmarks'),
@@ -66,141 +67,202 @@ createForm = function (l) {
      //var fstr = '<div class="formentry"><input type="file" id="btPcShooterChListFavoritesIcon" name="btPcShooterChListFavoritesIcon[]" value="' + l.icon + '" /></div>';
     jQUSel_EditBookMarks.html('');
 
-    window.console.log('------- createForm each --------');
-    window.console.log(l);
     $.each(l, function(i, n){
         showImg = (n.btPcShooterChListFavoritesBookMarksIcon === null || n.btPcShooterChListFavoritesBookMarksIcon.indexOf('data:image') === -1) ? blankImg : n.btPcShooterChListFavoritesBookMarksIcon;
         if (n.btPcShooterChListFavoritesBookMarksText.indexOf(titleFlag) > -1) {
             replaceTitleText = n.btPcShooterChListFavoritesBookMarksText.substr(titleFlag.length, n.btPcShooterChListFavoritesBookMarksText.length);
-            title = '<td colspan="10"><h3>';
-            titleEnd = '</h3></td>';
+            title = '<h3>';
+            titleEnd = '</h3>';
             isLink = false;
+            f = ' ' + titleFlag;
         } else {
             replaceTitleText = n.btPcShooterChListFavoritesBookMarksText;
             isLink = true;
             title = '';
             titleEnd = '';
+            f = '';
         }
         oddEven = (i % 2 === 0) ? 'even' : 'odd';
 
         // Construct form string
-        fstr += '<tr id="bookMarkID_' + l[i].bookmarkID + '">';
-        fstr += '<td>' + (i + 1) + '</td>';
+        fstr += '<tr id="bookMarkID_' + n.bookmarkID + '">';
+        fstr += formEntryTDStart + + (i + 1) + '</td>';
+        fstr += formEntryTDStart + '<img name="icon" id="icon" src="' + showImg + '" /><input type="hidden" name="btPcShooterChListFavoritesBookMarksIcon[]" id="btPcShooterChListFavoritesBookMarksIcon_' + i + '" value="' + showImg + '" /></td>';
+        fstr += formEntryTDStart + title + '<input class="ccm-input-text' + f + '" type="text" id="btPcShooterChListFavoritesBookMarksText_' + i + '" name="btPcShooterChListFavoritesBookMarksText[]" value="' + replaceTitleText + '" />' + titleEnd + '</td>';
         if (isLink) {
-            fstr += '<td><img name="icon" id="icon" src="' + showImg + '" /></td>';
-        }
-        fstr += '<input type="hidden" name="btPcShooterChListFavoritesBookMarksIcon[]" id="btPcShooterChListFavoritesBookMarksIcon_' + i + '" value="' + showImg + '" />';
-        fstr += formEntryTDStart + title + '<input class="ccm-input-text" type="text" id="btPcShooterChListFavoritesBookMarksText_' + i + '" name="btPcShooterChListFavoritesBookMarksText[]" value="' + replaceTitleText + '" />' + titleEnd + '</td>';
-        if (isLink) {
-            fstr += formEntryTDStart + '<input class="datepicker_' + i + '" type="text" id="btPcShooterChListFavoritesBookMarksDate_' + i + '" name="btPcShooterChListFavoritesBookMarksDate[]" value="' + l[i].btPcShooterChListFavoritesBookMarksDate + '" /></td>';
-            fstr += formEntryTDStart + '<input type="text" id="btPcShooterChListFavoritesBookMarksUrl_' + i + '" name="btPcShooterChListFavoritesBookMarksUrl[]" value="' + l[i].btPcShooterChListFavoritesBookMarksUrl + '" /></td>';
-            fstr += formEntryTDStart + '<input type="button" name="testbookmark_' + i + '" class="testbookmark" id="' + ajaxCall + '__' + l[i].btPcShooterChListFavoritesBookMarksUrl + '" value="' + ccm_t('test-link') + '" /></td>';
-            fstr += '<div id="showerrors_' + i + '" class="formentry"></td>';
+            fstr += formEntryTDStart + '<input class="datepicker_' + i + ' input-small" type="text" id="btPcShooterChListFavoritesBookMarksDate_' + i + '" name="btPcShooterChListFavoritesBookMarksDate[]" value="' + n.btPcShooterChListFavoritesBookMarksDate + '" /></td>';
+            fstr += formEntryTDStart + '<input class="span4" type="text" id="btPcShooterChListFavoritesBookMarksUrl_' + i + '" name="btPcShooterChListFavoritesBookMarksUrl[]" value="' + n.btPcShooterChListFavoritesBookMarksUrl + '" />';
+            fstr += formEntryTDStart + '<button name="testbookmark_' + i + '" class="testbookmark btn" id="' + ajaxCall + '__' + n.btPcShooterChListFavoritesBookMarksUrl + '">' + ccm_t('test-link') + '</button></td>';
+            fstr += formEntryTDStart + '</td>';
         } else {
-            fstr += '<input type="hidden" id="btPcShooterChListFavoritesBookMarksDate_' + i + '" name="btPcShooterChListFavoritesBookMarksDate[]" value="" /></td>';
-            fstr += '<input type="hidden" id="btPcShooterChListFavoritesBookMarksUrl_' + i + '" name="btPcShooterChListFavoritesBookMarksUrl[]" value="" /></td>';
+            fstr += formEntryTDStart + '<input type="hidden" id="btPcShooterChListFavoritesBookMarksDate_' + i + '" name="btPcShooterChListFavoritesBookMarksDate[]" value="" /></td>';
+            fstr += formEntryTDStart + '<input type="hidden" id="btPcShooterChListFavoritesBookMarksUrl_' + i + '" name="btPcShooterChListFavoritesBookMarksUrl[]" value="" /></td>';
+            fstr += formEntryTDStart + '</td>';
+            fstr += formEntryTDStart + '</td>';
         }
         fstr += '</tr>';
         jQUSel_EditBookMarks.append(fstr);
         fstr = '';
         $('#btPcShooterChListFavoritesBookMarksDate_' + i).datepicker();
         $('#btPcShooterChListFavoritesBookMarksDate_' + i).datepicker(
-            "setDate", l[i].btPcShooterChListFavoritesBookMarksDate, "option", "dateFormat", 'yy-mm-dd'
+            "setDate", n.btPcShooterChListFavoritesBookMarksDate, "option", "dateFormat", 'yy-mm-dd'
         );
     })
     $('#ccm-dialog-loader-wrapper').hide();
 
-
-    /*
-         for (i = 0; i < l.length; i += 1) {
-
-
-         fstr += '<div class="links-form ' + oddEven + '">';
-         if (isLink) {
-         fstr += '<div class="formentry formentry-icon"><img name="icon" id="icon" src="' + showImg + '" /></div>';
-         }
-         fstr += '<input type="hidden" name="btPcShooterChListFavoritesBookMarksIcon[]" id="btPcShooterChListFavoritesBookMarksIcon_' + i + '" value="' + showImg + '" />';
-         fstr += formEntryDivStart + title + '<input class="ccm-input-text" type="text" id="btPcShooterChListFavoritesBookMarksText_' + i + '" name="btPcShooterChListFavoritesBookMarksText[]" value="' + replaceTitleText + '" />' + titleEnd + '</div>';
-         if (isLink) {
-         fstr += formEntryDivStart + '<input type="text" id="btPcShooterChListFavoritesBookMarksDate_' + i + '" name="btPcShooterChListFavoritesBookMarksDate[]" value="' + l[i].btPcShooterChListFavoritesBookMarksDate + '" /></div>';
-         fstr += formEntryDivStart + '<input type="text" id="btPcShooterChListFavoritesBookMarksUrl_' + i + '" name="btPcShooterChListFavoritesBookMarksUrl[]" value="' + l[i].btPcShooterChListFavoritesBookMarksUrl + '" /></div>';
-         fstr += formEntryDivStart + '<input type="button" name="testbookmark_' + i + '" class="testbookmark" id="' + ajaxCall + '__' + l[i].btPcShooterChListFavoritesBookMarksUrl + '" value="' + ccm_t('test-link') + '" /></div>';
-         fstr += '<div id="showerrors_' + i + '" class="formentry"></div>';
-         } else {
-         fstr += formEntryDivStart + '<input type="hidden" id="btPcShooterChListFavoritesBookMarksDate_' + i + '" name="btPcShooterChListFavoritesBookMarksDate[]" value="" /></div>';
-         fstr += formEntryDivStart + '<input type="hidden" id="btPcShooterChListFavoritesBookMarksUrl_' + i + '" name="btPcShooterChListFavoritesBookMarksUrl[]" value="" /></div>';
-         }
-         fstr += '</div>';
-         fstr += '<div class="break"></div>';
-         jQUSel_EditBookMarks.append(fstr);
-         fstr = '';
-
-     */
-/*
-     //---- Event Listeners ----
-
-     // Updating button with url value
-     urlChange = document.getElementById('btPcShooterChListFavoritesBookMarksUrl_' + i);
-     urlChange.addEventListener('change', function () {
-     updateTestbookMarkValue($(this).val(), $(this).attr('id').split('_')[1])
-     , false
-     });
-
-     // Test bookmark
-     checkUrl = document.getElementById(ajaxCall + '__' + l[i].btPcShooterChListFavoritesBookMarksUrl);
-     if (checkUrl !== null) {
-     checkUrl.addEventListener('click', function () {
-     window.event.preventDefault();
-     var instance = this,
-     data = $(this).attr('id').split('__');
-     window.console.log('?????? ' + data);
-     jDt = checkBookMark(data, instance)
-     , false
-     });
-     }
-
-     // See header details button
-     seeErrors = document.getElementById('showerrors_' + i);
-     if (seeErrors !== null) {
-     seeErrors.addEventListener('click', function () {
-     window.event.preventDefault();
-     var entryId = $(this).attr('id').split('_')[1],
-     instance = $('[name="' + BTStr_checkUrl + '' + entryId + '"]'),
-     data = instance.attr('id').split('__'),
-     ref = $('#btPcShooterChListFavoritesBookMarksUrl_' + entryId).val();
-     //jDt = checkBookMark(data, instance);
-     loadUrlErrorDialog(jDt, ref)
-     , false
-     });
-     }
-
-     // See header details dialog
-     displayCheck = document.getElementById(BTStr_seeErrors + '' + i);
-     if (displayCheck !== null) {
-     displayCheck.addEventListener('click', function () {
-     window.event.preventDefault();
-     var ref = $('#btPcShooterChListFavoritesBookMarksUrl_' + i).val();
-     window.console.log('isches das' + ref)
-     loadUrlErrorDialog(jDt, ref)
-     , false
-     });
-     }
-
-     // Test bookmark
-     displayCheck = document.getElementById(BTStr_seeErrors + '' + i);
-     if (displayCheck !== null) {
-     displayCheck.addEventListener('click', function () {
-     window.event.preventDefault();
-     var ref = $('#btPcShooterChListFavoritesBookMarksUrl_' + i).val();
-     window.console.log(ref)
-     loadUrlErrorDialog(jDt, ref)
-     , false
-     });
-     }
-  *//*
-     }
-*/
-
      jQUSel_EditBookMarks.append('<input type="hidden" name="numRecords" id="numRecords" value="' + l.length + '">');
 
+}
+
+checkBookMark = function (valData, instance) {
+    var goto,
+        d,
+        ref = valData[valData.length - 1],
+        jData = {};
+    d = valData.splice(valData.length - 1, 1)
+    goto = valData.join('_');
+    $('#ccm-dialog-loader-wrapper').show();
+    $.ajax({
+        type: 'POST',
+        async: false,
+        url: goto,
+        data: {
+            bookMark: ref
+        },
+        /**
+         * Returns jData: Object {
+             *      0: "HTTP/1.0 301 Moved Permanently"
+             *      1: "HTTP/1.0 302 Found"
+             *      2: "HTTP/1.0 200 OK"
+             *      ...
+             * }
+         * object is string false (php, sorry) on error
+         *
+         * @param data jSon-encoded PHP Array
+         * @returns {boolean} used to break the for-loop
+         *
+         */
+
+        success: function (data) {
+            var errorText = '',
+                isNull = (data === 'false') ? true : false,
+                urlValid = false,
+                counter = null;
+            jData = $.parseJSON(data);
+            $.each(jData, function (i, n) {
+                goto = valData.join('i');
+                window.console.log(i);
+                if (isNull) {
+                    urlValid = null;
+                    //return false;
+                } else if ($.isNumeric(i)) {
+                    errorText = n;
+                    if (n.indexOf('200') > -1) {
+                        urlValid = true;
+                    } else {
+                        urlValid = false;
+                        counter = i;
+                    }
+                }
+            });
+            // Display result of url-check
+            displayUrlCheck(instance, urlValid);
+            $('#ccm-dialog-loader-wrapper').hide();
+
+        }
+    });
+    return jData;
+}
+
+saveBookmarksByID = function (id, args) {
+    $.ajax({
+        type: 'POST',
+        url: save_bookmarks,
+        data: {
+            bookmarkID: id,
+            fieldValues: args
+        }
+        //success: function (data) {
+        //    jData = $.parseJSON(data);
+        //    if (data === null) {
+        //        ccm_addError(ccm_t('parsing-failed'));
+        //        return false;
+        //    }
+        //    createForm(jData);
+        //}
+    });
+
+}
+/**
+ * Displays 'See error button' and/or header-status text
+ * @param check: true, false or null
+ */
+
+displayUrlCheck = function (instance, check) {
+    console.log(instance);
+    var valEl = (instance !== null) ? $('[name="testbookmark_' + instance + '"]') : $(''),
+        errorEl = (instance !== null) ? valEl.parent().next('td') : $(''),
+        errorButton = (instance !== null) ? '<button class="btn" id="' + BTStr_seeErrors + '' + instance + '">' + ccm_t('see-errors') + '</button>' : '';
+
+    switch (check) {
+        case null:
+            valEl.html(ccm_t('bookmark-error'));
+            errorEl.html(errorButton);
+            break;
+        case true:
+            valEl.html(ccm_t('bookmark-valid'));
+            break;
+        case false:
+            valEl.html(ccm_t('bookmark-error'));
+            errorEl.html(errorButton);
+            break;
+    }
+}
+
+loadUrlErrorDialog = function (obj, ref) {
+    var shortref = ref.substring(0, 47) + '... ';
+    jQuery.fn.dialog.open({
+        title: ccm_t('url-error-dialog-title') + ': ' + '<div class="url-error-dialog-ref">' + shortref + '</div>',
+        element: createDialogElement(obj),
+        width: 550,
+        modal: false,
+        height: 275
+    });
+}
+
+/**
+ *
+ * @param data
+ * @returns {string}
+ */
+
+createDialogElement = function (data) {
+    var str = '<div id="url-error-dialog">',
+        falseStr = '';
+    if (falseStr = (typeof data === 'boolean')) {
+        falseStr = ccm_t('no-errors-to-show');
+        str += '<div class="url-error-dialog-container"><span class="value">' + falseStr + '</span></div>';
+    } else {
+        $.each(data, function (n, i) {
+            str += '<div class="url-error-dialog-container"><span class="key">' + n + '</span>: <span class="value">\"' + falseStr + i + '\"</span></div>';
+        })
+    }
+    str += '<div class="ccm-buttons dialog-buttons">' +
+        '<a href="javascript::void(0)" id="url-error-dialog-close" class="btn ccm-button-right cancel">' + ccm_t('close') + '</a>' +
+        '<a href="javascript::void(0)" id="url-error-dialog-print" class="btn ccm-button-left cancel">' + ccm_t('print') + '</a>' +
+        '</div>';
+    //jQuery.fn.dialog
+    str += '</div>';
+    return str += '<iframe id="url-error-dialog-print-content" style="height: 0px; width: 0px; position: absolute"></iframe>'
+}
+
+
+/**
+ *
+ * @param el
+ * @param index
+ */
+
+updateTestbookMarkValue = function (el, index) {
+    $('[name="' + BTStr_checkUrl + '' + index + '"]').attr('id', ajaxCall + '__' + el);
 }

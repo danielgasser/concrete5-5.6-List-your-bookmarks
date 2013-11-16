@@ -97,7 +97,7 @@ while ($i < sizeof($buffer)) {
         if (strpos($buffer[$i][$j], '</H3>') !== false) {
             $newArr[$i][$tableColumns[$colSortKeys[$j]]] = trim(strip_tags('title_' . preg_replace('/[[:cntrl:]]/i', '', $buffer[$i][$j])));
         } else {
-            $newArr[$i][$tableColumns[$colSortKeys[$j]]] = strip_tags($buffer[$i][$j]);
+            $newArr[$i][$tableColumns[$colSortKeys[$j]]] = trim(strip_tags(preg_replace('/[[:cntrl:]]/i', '', $buffer[$i][$j])));
         }
         // Set a formatted date from timestamp
         if ($tableColumns[$colSortKeys[$j]] == 'btPcShooterChListFavoritesBookMarksDate') {

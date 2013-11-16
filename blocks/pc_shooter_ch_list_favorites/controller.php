@@ -29,7 +29,7 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
     /**
      * @var int Add/edit window width
      */
-    protected $btInterfaceWidth = 1200;
+    protected $btInterfaceWidth = 960;
     /**
      * @var int Add/edit window height
      */
@@ -42,6 +42,11 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
      * @var string DB bookmark table foreign key name
      */
     protected $bookmarkTableForeignKeyField = 'blockID';
+
+    /**
+     * @var string C5 Styling
+     */
+    protected $btWrapperClass = 'ccm-ui';
 
     /**
      * @var string Blank image for icon
@@ -172,7 +177,6 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
      * @return array
      */
     public function action_get_bookmark_data_json() {
-        Log::addEntry('action_get_bookmark_data_json');
         echo json_encode($this->getBookmarkDataRecords($this->bID));
        // exit;
     }
@@ -188,6 +192,23 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
         return $db->GetAll('SELECT bookmarkID, btPcShooterChListFavoritesBookMarksIcon, btPcShooterChListFavoritesBookMarksDate, btPcShooterChListFavoritesBookMarksText, btPcShooterChListFavoritesBookMarksUrl FROM ' . $this->bookmarkTable . ' WHERE ' . $this->bookmarkTableForeignKeyField . ' = ' . $blockID);
     }
 
+    public function updateBookmarksByID($bookmarkID, $args) {
+        $db = Loader::db();
+        Log::addEntry('UPDATE ' . $this->bookmarkTable . ' SET
+                        btPcShooterChListFavoritesBookMarksIcon = "' . mysql_real_escape_string($args[0]) . '",
+                        btPcShooterChListFavoritesBookMarksText = "' . mysql_real_escape_string($args[1]) . '",
+                        btPcShooterChListFavoritesBookMarksDate = "' . mysql_real_escape_string($args[2]) . '",
+                        btPcShooterChListFavoritesBookMarksUrl = "' . mysql_real_escape_string($args[3]) . '"
+                         WHERE bookmarkID = ' . $bookmarkID);
+
+
+        $db->Execute('UPDATE ' . $this->bookmarkTable . ' SET
+                        btPcShooterChListFavoritesBookMarksIcon = "' . mysql_real_escape_string($args[0]) . '",
+                        btPcShooterChListFavoritesBookMarksText = "' . mysql_real_escape_string($args[1]) . '",
+                        btPcShooterChListFavoritesBookMarksDate = "' . mysql_real_escape_string($args[2]) . '",
+                        btPcShooterChListFavoritesBookMarksUrl = "' . mysql_real_escape_string($args[3]) . '"
+                         WHERE bookmarkID = ' . $bookmarkID);
+    }
     /**
      * Delete bookmarks from db
      * @param $blockID bID
@@ -243,7 +264,8 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
      * Adds a block
      */
     public function add() {
-        //$this->set_block_tool('get_bookmarks');
+        $this->set_block_tool('check_url');
+        $this->set_block_tool('save_bookmarks');
         $this->set_package_tool('parse_html');
         $this->set_package_tool('delete_unused_bookmarks_from_db');
         $this->setHtmlExtension();
@@ -256,7 +278,9 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
      * Block edit
      */
     public function edit() {
+        $this->set_block_tool('check_url');
         $this->set_block_tool('get_bookmarks');
+        $this->set_block_tool('save_bookmarks');
         $this->set_package_tool('parse_html');
         $this->set_package_tool('delete_unused_bookmarks_from_db');
         $this->setHtmlExtension();

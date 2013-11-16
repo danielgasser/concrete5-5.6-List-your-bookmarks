@@ -24,12 +24,16 @@ $jData = $this->action('get_bookmark_data_json');
         ajaxCall = '<?= $check_url; ?>',
         parse_html = '<?php echo $parse_html ?>',
         get_bookmarks = '<?php echo $get_bookmarks ?>',
+        save_bookmarks = '<?php echo $save_bookmarks ?>',
         bookMarkData = '<?php echo $jData ?>',
         blockID = '<?php echo $controller->bID ?>',
         BlankImage = '<?php echo $blankImage;  ?>', // 26 Bytes
         delete_unused_bookmarks_from_db = '<?php echo $delete_unused_bookmarks_from_db; ?>',
         pkgHandle = '<?php echo $controller->getPkgHandle(); ?>',
-        jData = null;
+        jData = null,
+        jDt = null,
+        BTStr_seeErrors = 'seeErrors_',
+        BTStr_checkUrl = 'testbookmark_';
     $(document).ready(function () {
         window.console.log('waaaaaaaas' + blockID.length);
         if (blockID.length > 0) {
@@ -48,11 +52,64 @@ $jData = $this->action('get_bookmark_data_json');
                 }
             });
         }
+
+        $('[name^="' + BTStr_checkUrl + '"]').live('click', function (e) {
+            window.console.log('??????');
+            e.preventDefault();
+            var instance = $(this).attr('name').split('_')[1],
+                data = $(this).attr('id').split('__');
+            jDt = checkBookMark(data, instance);
+        })
+
+        $('[id^="' + BTStr_seeErrors + '"]').live('click', function () {
+            var entryId = $(this).attr('id').split('_')[1],
+                instance = $('[name="' + BTStr_checkUrl + '' + entryId + '"]'),
+                data = instance.attr('id').split('__'),
+                ref = $('#btPcShooterChListFavoritesBookMarksUrl_' + entryId).val();
+            //jDt = checkBookMark(data, instance);
+            loadUrlErrorDialog(jDt, ref);
+        })
+
+        $('[id^="btPcShooterChListFavoritesBookMarksUrl_"]').live('change', function() {
+            updateTestbookMarkValue($(this).val(), $(this).attr('id').split('_')[1]);
+        })
+
+        $('#url-error-dialog-print').live('click', function (e) {
+            window.console.log('printDisplayCheck')
+            e.preventDefault();
+            var content = document.getElementById("url-error-dialog");
+            var pri = document.getElementById("url-error-dialog-print-content").contentWindow;
+            pri.document.open();
+            pri.document.write(content.innerHTML);
+            pri.document.close();
+            pri.focus();
+            pri.print();
+        })
+
+        $('#url-error-dialog-close').live('click', function (e) {
+            e.preventDefault();
+            ccm_blockWindowClose();
+        })
+        $('input[id^="btPcShooterChListFavoritesBookMark"]').live('change', function(){
+            var record = $(this).closest('tr'),
+                data = [],
+                bookmarkID = record.attr('id').split('_')[1];
+            record.find('td > :hidden, :text').each(function(i, n){
+                if ($(n).hasClass('title_')) {
+                    data.push('title_' + $(n).val());
+                } else {
+                    data.push($(n).val());
+                }
+                window.console.log($(n).val());
+            })
+            window.console.log(data);
+            saveBookmarksByID(bookmarkID, data);
+        })
     })
 
 </script>
-<div class="ccm-ui">
-    <table class="table table-condensed">
+<div>
+    <table class="table table-condensed" border="1">
         <thead>
             <tr>
                 <td colspan="10">
@@ -94,10 +151,8 @@ $jData = $this->action('get_bookmark_data_json');
                     <?php print t('See header details'); ?>
                 </th>
                 <th>
-                    <?php print t('Delete'); ?>
                 </th>
                 <th>
-                    <?php print t('Move'); ?>
                 </th>
             </tr>
         </thead>
