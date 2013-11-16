@@ -142,6 +142,7 @@ $jsonData = $newArr;
 // That's it. Send it back to the client & controller
 
 $bc->setBookmarkData($newArr);
-echo json_encode($newArr);
+$realNew = $bc->getBookmarkDataRecords(PHP_INT_MAX);
+echo json_encode($realNew);
 
 exit;

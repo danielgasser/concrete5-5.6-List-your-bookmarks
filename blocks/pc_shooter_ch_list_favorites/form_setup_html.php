@@ -31,8 +31,7 @@ $jData = $this->action('get_bookmark_data_json');
         pkgHandle = '<?php echo $controller->getPkgHandle(); ?>',
         jData = null;
     $(document).ready(function () {
-        window.console.log('bid' + blockID.length);
-
+        window.console.log('waaaaaaaas' + blockID.length);
         if (blockID.length > 0) {
             $('#ccm-dialog-loader-wrapper').show();
             $.ajax({
@@ -43,6 +42,7 @@ $jData = $this->action('get_bookmark_data_json');
                 },
                 success: function (data) {
                     jData = $.parseJSON(data);
+                    window.console.log('this');
                     window.console.log(jData);
                     createForm(jData);
                 }

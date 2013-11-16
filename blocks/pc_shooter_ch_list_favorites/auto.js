@@ -14,7 +14,6 @@
  * Parent function overrides
  * @param args
  */
-
 window.ccm_alSelectFile = function(args) {
     var jData = null;
     $('#ccm-dialog-loader-wrapper').show();
@@ -26,7 +25,10 @@ window.ccm_alSelectFile = function(args) {
         },
         success: function (data) {
             jData = $.parseJSON(data);
-            //window.console.log(jData);
+            if (data === null) {
+                ccm_addError(ccm_t('parsing-failed'));
+                return false;
+            }
             createForm(jData);
         }
     });
@@ -82,7 +84,7 @@ createForm = function (l) {
         oddEven = (i % 2 === 0) ? 'even' : 'odd';
 
         // Construct form string
-        fstr += '<tr>';
+        fstr += '<tr id="bookMarkID_' + l[i].bookmarkID + '">';
         fstr += '<td>' + (i + 1) + '</td>';
         if (isLink) {
             fstr += '<td><img name="icon" id="icon" src="' + showImg + '" /></td>';
@@ -90,7 +92,7 @@ createForm = function (l) {
         fstr += '<input type="hidden" name="btPcShooterChListFavoritesBookMarksIcon[]" id="btPcShooterChListFavoritesBookMarksIcon_' + i + '" value="' + showImg + '" />';
         fstr += formEntryTDStart + title + '<input class="ccm-input-text" type="text" id="btPcShooterChListFavoritesBookMarksText_' + i + '" name="btPcShooterChListFavoritesBookMarksText[]" value="' + replaceTitleText + '" />' + titleEnd + '</td>';
         if (isLink) {
-            fstr += formEntryTDStart + '<input type="text" id="btPcShooterChListFavoritesBookMarksDate_' + i + '" name="btPcShooterChListFavoritesBookMarksDate[]" value="' + l[i].btPcShooterChListFavoritesBookMarksDate + '" /></td>';
+            fstr += formEntryTDStart + '<input class="datepicker_' + i + '" type="text" id="btPcShooterChListFavoritesBookMarksDate_' + i + '" name="btPcShooterChListFavoritesBookMarksDate[]" value="' + l[i].btPcShooterChListFavoritesBookMarksDate + '" /></td>';
             fstr += formEntryTDStart + '<input type="text" id="btPcShooterChListFavoritesBookMarksUrl_' + i + '" name="btPcShooterChListFavoritesBookMarksUrl[]" value="' + l[i].btPcShooterChListFavoritesBookMarksUrl + '" /></td>';
             fstr += formEntryTDStart + '<input type="button" name="testbookmark_' + i + '" class="testbookmark" id="' + ajaxCall + '__' + l[i].btPcShooterChListFavoritesBookMarksUrl + '" value="' + ccm_t('test-link') + '" /></td>';
             fstr += '<div id="showerrors_' + i + '" class="formentry"></td>';
@@ -101,8 +103,13 @@ createForm = function (l) {
         fstr += '</tr>';
         jQUSel_EditBookMarks.append(fstr);
         fstr = '';
+        $('#btPcShooterChListFavoritesBookMarksDate_' + i).datepicker();
+        $('#btPcShooterChListFavoritesBookMarksDate_' + i).datepicker(
+            "setDate", l[i].btPcShooterChListFavoritesBookMarksDate, "option", "dateFormat", 'yy-mm-dd'
+        );
     })
     $('#ccm-dialog-loader-wrapper').hide();
+
 
     /*
          for (i = 0; i < l.length; i += 1) {

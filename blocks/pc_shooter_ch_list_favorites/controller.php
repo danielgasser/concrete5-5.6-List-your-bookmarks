@@ -103,6 +103,7 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
             'bookmark-error' => t('This bookmark is not a valid URL.'),
             'see-errors' => t('See header details.'),
             'url-error-dialog-title' => t('Header details for URL'),
+            'parsing-failed' => t('The bookmark file wasn\'t parsed'),
             // Der angegebene Host ist unbekannt
             'num-records' => t('Entries'),
             'meta-title' => ('Title'),
@@ -184,7 +185,7 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
     public function getBookmarkDataRecords($blockID) {
         $db = Loader::db();
 
-        return $db->GetAll('SELECT btPcShooterChListFavoritesBookMarksIcon, btPcShooterChListFavoritesBookMarksDate, btPcShooterChListFavoritesBookMarksText, btPcShooterChListFavoritesBookMarksUrl FROM ' . $this->bookmarkTable . ' WHERE ' . $this->bookmarkTableForeignKeyField . ' = ' . $blockID);
+        return $db->GetAll('SELECT bookmarkID, btPcShooterChListFavoritesBookMarksIcon, btPcShooterChListFavoritesBookMarksDate, btPcShooterChListFavoritesBookMarksText, btPcShooterChListFavoritesBookMarksUrl FROM ' . $this->bookmarkTable . ' WHERE ' . $this->bookmarkTableForeignKeyField . ' = ' . $blockID);
     }
 
     /**
@@ -310,6 +311,8 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
      * Page view
      */
     public function on_page_view() {
+        $html = Loader::helper('html');
+        $this->addHeaderItem($html->javascript('jquery.ui.js'));
         $this->deleteBookmarkRecords(PHP_INT_MAX);
     }
 
