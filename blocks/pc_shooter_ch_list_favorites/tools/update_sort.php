@@ -14,13 +14,15 @@
 
 defined('C5_EXECUTE') or die("Access Denied.");
 $bc = new PcShooterChListFavoritesBlockController();
-
+$db = Loader::db();
 $bookmarkID = mysql_real_escape_string($_POST['bookmarkID']);
-// That's it. Send it back to the client & controller
-echo '<pre>';
-print_r($_POST['fieldValues']);
-echo '</pre>';
-$result = $bc->updateBookmarksByID($bookmarkID, $_POST['fieldValues']);
-echo json_encode($result);
-
+$arr = $_POST['sortage'];
+$i = 0;
+$queryStr = 'UPDATE btPcShooterChListFavoritesBookMarks SET Zsort = CASE' . "\n";
+while($i < sizeof($arr)){
+    $queryStr .= 'WHEN bookmarkID = ' . mysql_real_escape_string($arr[$i]['bid']) .' THEN ' . mysql_real_escape_string($arr[$i]['vale']) . "\n";
+    $i++;
+}
+$queryStr .= ' END';
+$db->Execute($queryStr);
 exit;

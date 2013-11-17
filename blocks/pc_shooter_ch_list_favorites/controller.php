@@ -29,7 +29,7 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
     /**
      * @var int Add/edit window width
      */
-    protected $btInterfaceWidth = 960;
+    protected $btInterfaceWidth = 1250;
     /**
      * @var int Add/edit window height
      */
@@ -233,6 +233,25 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
     }
 
     /**
+     * Updates the blockid of bookmarks
+     */
+    public function updateAllBookmarkRecordsSort() {
+        $db = Loader::db();
+        $i = $db->Getall('SELECT bookmarkID, Zsort FROM ' . $this->bookmarkTable . ' WHERE ' . $this->bookmarkTableForeignKeyField . ' = ' . $this->bID);
+        foreach ($i as $val) {
+            foreach ($val as $key => $value) {
+                Log::addEntry($key . ': '. $value);
+            }
+
+        }
+
+       // foreach ($c as $key => $val) {
+       //     Log::addEntry('UPDATE ' . $this->bookmarkTable . ' SET Zsort = ' . $i . ' WHERE bookmarkID = ' . $key);
+       //     $db->Execute('UPDATE ' . $this->bookmarkTable . ' SET Zsort = ' . $i . ' WHERE bookmarkID = ' . $key);
+       // }
+    }
+
+    /**
      * Clears permission to upload html files into file manager
      * @param $pkg Package handle
      */
@@ -263,6 +282,7 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
         parent::save($args);
         $this->clearHtmlExtension($this->getPkgHandle());
         $this->updateBookmarkRecordsBlockID();
+        $this->updateAllBookmarkRecordsSort();
         $this->deleteBookmarkRecords(PHP_INT_MAX);
     }
 
@@ -272,6 +292,7 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
     public function add() {
         $this->set_block_tool('check_url');
         $this->set_block_tool('save_bookmarks');
+        $this->set_block_tool('update_sort');
         $this->set_package_tool('parse_html');
         $this->set_package_tool('delete_unused_bookmarks_from_db');
         $this->setHtmlExtension();
@@ -287,6 +308,7 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
         $this->set_block_tool('check_url');
         $this->set_block_tool('get_bookmarks');
         $this->set_block_tool('save_bookmarks');
+        $this->set_block_tool('update_sort');
         $this->set_package_tool('parse_html');
         $this->set_package_tool('delete_unused_bookmarks_from_db');
         $this->setHtmlExtension();
@@ -309,6 +331,8 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
      */
     public function delete() {
         $db = Loader::db();
+        $this->deleteBookmarkRecords($this->bID);
+        $this->deleteBookmarkRecords(PHP_INT_MAX);
         parent::delete();
     }
 

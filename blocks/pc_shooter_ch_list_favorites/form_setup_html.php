@@ -25,6 +25,7 @@ $jData = $this->action('get_bookmark_data_json');
         parse_html = '<?php echo $parse_html ?>',
         get_bookmarks = '<?php echo $get_bookmarks ?>',
         save_bookmarks = '<?php echo $save_bookmarks ?>',
+        update_sort = '<?php echo $update_sort ?>',
         bookMarkData = '<?php echo $jData ?>',
         blockID = '<?php echo $controller->bID ?>',
         BlankImage = '<?php echo $blankImage;  ?>', // 26 Bytes
@@ -33,9 +34,12 @@ $jData = $this->action('get_bookmark_data_json');
         jData = null,
         jDt = null,
         BTStr_seeErrors = 'seeErrors_',
-        BTStr_checkUrl = 'testbookmark_';
+        BTStr_checkUrl = 'testbookmark_',
+        bookmarkStartPos = 0,
+        bookmarkStartClass = '',
+        bookmarkStartID = 0,
+        bookmarkEndPos = 0;
     $(document).ready(function () {
-        window.console.log('waaaaaaaas' + blockID.length);
         if (blockID.length > 0) {
             $('#ccm-dialog-loader-wrapper').show();
             $.ajax({
@@ -46,15 +50,12 @@ $jData = $this->action('get_bookmark_data_json');
                 },
                 success: function (data) {
                     jData = $.parseJSON(data);
-                    window.console.log('this');
-                    window.console.log(jData);
                     createForm(jData);
                 }
             });
         }
 
         $('[name^="' + BTStr_checkUrl + '"]').live('click', function (e) {
-            window.console.log('??????');
             e.preventDefault();
             var instance = $(this).attr('name').split('_')[1],
                 data = $(this).attr('id').split('__');
@@ -75,7 +76,6 @@ $jData = $this->action('get_bookmark_data_json');
         })
 
         $('#url-error-dialog-print').live('click', function (e) {
-            window.console.log('printDisplayCheck')
             e.preventDefault();
             var content = document.getElementById("url-error-dialog");
             var pri = document.getElementById("url-error-dialog-print-content").contentWindow;
@@ -95,21 +95,69 @@ $jData = $this->action('get_bookmark_data_json');
                 data = [],
                 bookmarkID = record.attr('id').split('_')[1];
             record.find('td > :hidden, :text').each(function(i, n){
-                window.console.log('hidden & text');
-                window.console.log('i');
-                window.console.log(i);
-                window.console.log('n');
-                window.console.log(n);
                 if ($(n).hasClass('title_')) {
                     data.push('title_' + $(n).val());
                 } else {
                     data.push($(n).val());
                 }
-                window.console.log($(n).val());
             })
             saveBookmarksByID(bookmarkID, data);
         })
+
+        $('.table-condensed').sortable(
+            {
+                items: '.sortable_row',
+                handle: '.sort_handle',
+                start: function(event, ui) {
+                    bookmarkStartClass = $(ui.item[0].children[0]).attr('class');
+                    bookmarkStartID = $(ui.item[0]).attr('id');
+                    bookmarkStartPos = $(ui.item[0].children[0]).html();
+                },
+                update: function (event, ui) {
+                    bookmarkEndPos = $(ui.item[0].children[0]).html();
+                    refreshPosition();
+                }
+            }
+        );
+        $('.table-condensed').disableSelection();
+
+
     })
+refreshPosition = function(){
+    var ids = [],
+        j,
+        id,
+        oldid;
+    $.each($('.' + bookmarkStartClass), function (i, n) {
+        j = i + 1;
+        $(this).text(j);
+        //$('[id="Zsort_' + j + '"]').val(j);
+    });
+    $.each($('.inputZsort'), function (i, n) {
+        j = i + 1;
+        id = $(this).parent().parent().attr('id').split('_')[1];
+        oldid = parseInt($(this).attr('id').split('_')[1], 10);
+        $(this).val(i);
+        window.console.log(oldid);
+        ids.push(
+        {
+            bid: id,
+            vale: i
+        });
+    });
+    $.ajax({
+        type: 'POST',
+        url: update_sort,
+        data: {
+            sortage: ids
+        },
+        success: function (data) {
+            jData = $.parseJSON(data);
+            window.console.log(jData);
+        }
+    });
+    window.console.log(ids)
+}
 
 </script>
 <div>
@@ -129,7 +177,7 @@ $jData = $this->action('get_bookmark_data_json');
 
             <tr>
                 <td colspan="10">
-                    <?php print t('Entries') . ': ' . sizeof($bookMarkData); ?>
+                    <?php print t('Entries') . ': <span id="numRecords"></span>'; ?>
                 </td>
             </tr>
             <tr>
@@ -143,7 +191,7 @@ $jData = $this->action('get_bookmark_data_json');
                     <?php print t('Title'); ?>
                 </th>
                 <th>
-                    <?php print t('Date added'); ?>
+                    <?php print t('Added'); ?>
                 </th>
                 <th>
                     <?php print t('www'); ?>
@@ -155,8 +203,10 @@ $jData = $this->action('get_bookmark_data_json');
                     <?php print t('See header details'); ?>
                 </th>
                 <th>
+                    <?php print t('Sort'); ?>
                 </th>
                 <th>
+                    <?php print t('Delete'); ?>
                 </th>
             </tr>
         </thead>

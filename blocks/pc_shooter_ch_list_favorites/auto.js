@@ -85,21 +85,23 @@ createForm = function (l) {
         oddEven = (i % 2 === 0) ? 'even' : 'odd';
 
         // Construct form string
-        fstr += '<tr id="bookMarkID_' + n.bookmarkID + '">';
-        fstr += formEntryTDStart + + (i + 1) + '</td>';
+        fstr += '<tr class="sortable_row" id="bookMarkID_' + n.bookmarkID + '">';
+        fstr += '<td class="zsort">' + + (i + 1) + '</td>';
         fstr += formEntryTDStart + '<img name="icon" id="icon" src="' + showImg + '" /><input type="hidden" name="btPcShooterChListFavoritesBookMarksIcon[]" id="btPcShooterChListFavoritesBookMarksIcon_' + i + '" value="' + showImg + '" /></td>';
-        fstr += formEntryTDStart + title + '<input class="ccm-input-text' + f + '" type="text" id="btPcShooterChListFavoritesBookMarksText_' + i + '" name="btPcShooterChListFavoritesBookMarksText[]" value="' + replaceTitleText + '" />' + titleEnd + '</td>';
+        fstr += formEntryTDStart + title + '<input class="ccm-input-text' + f + '" type="text" id="btPcShooterChListFavoritesBookMarksText_' + i + '" name="btPcShooterChListFavoritesBookMarksText[]" value="' + replaceTitleText + '" />' + titleEnd + n.bookmarkID + '</td>';
         if (isLink) {
             fstr += formEntryTDStart + '<input class="datepicker_' + i + ' input-small" type="text" id="btPcShooterChListFavoritesBookMarksDate_' + i + '" name="btPcShooterChListFavoritesBookMarksDate[]" value="' + n.btPcShooterChListFavoritesBookMarksDate + '" /></td>';
             fstr += formEntryTDStart + '<input class="span4" type="text" id="btPcShooterChListFavoritesBookMarksUrl_' + i + '" name="btPcShooterChListFavoritesBookMarksUrl[]" value="' + n.btPcShooterChListFavoritesBookMarksUrl + '" />';
             fstr += formEntryTDStart + '<button name="testbookmark_' + i + '" class="testbookmark btn" id="' + ajaxCall + '__' + n.btPcShooterChListFavoritesBookMarksUrl + '">' + ccm_t('test-link') + '</button></td>';
-            fstr += formEntryTDStart + '<input type="hidden" id="Zsort_' + i + '" name="Zsort[]" value="' + i + '" /></td>';
+            fstr += formEntryTDStart + '<input type="hidden" class="inputZsort" id="Zsort_' + i + '" name="Zsort[]" value="' + i + '" /></td>';
         } else {
             fstr += formEntryTDStart + '<input type="hidden" id="btPcShooterChListFavoritesBookMarksDate_' + i + '" name="btPcShooterChListFavoritesBookMarksDate[]" value="" /></td>';
             fstr += formEntryTDStart + '<input type="hidden" id="btPcShooterChListFavoritesBookMarksUrl_' + i + '" name="btPcShooterChListFavoritesBookMarksUrl[]" value="" /></td>';
             fstr += formEntryTDStart + '</td>';
-            fstr += formEntryTDStart + '<input type="hidden" id="Zsort_' + i + '" name="Zsort[]" value="' + i + '" /></td>';
+            fstr += formEntryTDStart + '<input type="hidden" class="inputZsort" id="Zsort_' + i + '" name="Zsort[]" value="' + i + '" /></td>';
         }
+        fstr += formEntryTDStart + '<img class="ccm-group-sort sort_handle" src="/c5/concrete/images/icons/up_down.png" width="14" height="14"></td>';
+        fstr += formEntryTDStart + '</td>';
         fstr += '</tr>';
         jQUSel_EditBookMarks.append(fstr);
         fstr = '';
@@ -110,7 +112,7 @@ createForm = function (l) {
     })
     $('#ccm-dialog-loader-wrapper').hide();
 
-     jQUSel_EditBookMarks.append('<input type="hidden" name="numRecords" id="numRecords" value="' + l.length + '">');
+     $('#numRecords').text(l.length);
 
 }
 
@@ -151,7 +153,6 @@ checkBookMark = function (valData, instance) {
             jData = $.parseJSON(data);
             $.each(jData, function (i, n) {
                 goto = valData.join('i');
-                window.console.log(i);
                 if (isNull) {
                     urlValid = null;
                     //return false;
@@ -175,12 +176,23 @@ checkBookMark = function (valData, instance) {
 }
 
 saveBookmarksByID = function (id, args) {
-    window.console.log(args);
     $.ajax({
         type: 'POST',
         url: save_bookmarks,
         data: {
             bookmarkID: id,
+            fieldValues: args
+        }
+    });
+
+}
+
+saveAllBookmarksByID = function (ids, args) {
+    $.ajax({
+        type: 'POST',
+        url: save_bookmarks,
+        data: {
+            bookmarkID: ids,
             fieldValues: args
         }
         //success: function (data) {
