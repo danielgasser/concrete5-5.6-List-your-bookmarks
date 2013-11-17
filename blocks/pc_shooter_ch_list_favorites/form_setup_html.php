@@ -95,6 +95,11 @@ $jData = $this->action('get_bookmark_data_json');
                 data = [],
                 bookmarkID = record.attr('id').split('_')[1];
             record.find('td > :hidden, :text').each(function(i, n){
+                window.console.log('hidden & text');
+                window.console.log('i');
+                window.console.log(i);
+                window.console.log('n');
+                window.console.log(n);
                 if ($(n).hasClass('title_')) {
                     data.push('title_' + $(n).val());
                 } else {
@@ -102,7 +107,6 @@ $jData = $this->action('get_bookmark_data_json');
                 }
                 window.console.log($(n).val());
             })
-            window.console.log(data);
             saveBookmarksByID(bookmarkID, data);
         })
     })

@@ -18,7 +18,9 @@ $bc = new PcShooterChListFavoritesBlockController();
 $bookmarkID = mysql_real_escape_string($_POST['bookmarkID']);
 
 // That's it. Send it back to the client & controller
-
+echo '<pre>';
+print_r($_POST['fieldValues']);
+echo '</pre>';
 $result = $bc->updateBookmarksByID($bookmarkID, $_POST['fieldValues']);
 echo json_encode($result);
 

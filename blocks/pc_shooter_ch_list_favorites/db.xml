@@ -30,5 +30,8 @@
         </field>
         <field name="btPcShooterChListFavoritesBookMarksUrl" type="C" size="255">
         </field>
+        <field name="Zsort" type="I">
+            <unsigned/>
+        </field>
     </table>
 </schema>

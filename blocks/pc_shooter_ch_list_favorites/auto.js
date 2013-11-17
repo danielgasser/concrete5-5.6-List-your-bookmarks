@@ -93,12 +93,12 @@ createForm = function (l) {
             fstr += formEntryTDStart + '<input class="datepicker_' + i + ' input-small" type="text" id="btPcShooterChListFavoritesBookMarksDate_' + i + '" name="btPcShooterChListFavoritesBookMarksDate[]" value="' + n.btPcShooterChListFavoritesBookMarksDate + '" /></td>';
             fstr += formEntryTDStart + '<input class="span4" type="text" id="btPcShooterChListFavoritesBookMarksUrl_' + i + '" name="btPcShooterChListFavoritesBookMarksUrl[]" value="' + n.btPcShooterChListFavoritesBookMarksUrl + '" />';
             fstr += formEntryTDStart + '<button name="testbookmark_' + i + '" class="testbookmark btn" id="' + ajaxCall + '__' + n.btPcShooterChListFavoritesBookMarksUrl + '">' + ccm_t('test-link') + '</button></td>';
-            fstr += formEntryTDStart + '</td>';
+            fstr += formEntryTDStart + '<input type="hidden" id="Zsort_' + i + '" name="Zsort[]" value="' + i + '" /></td>';
         } else {
             fstr += formEntryTDStart + '<input type="hidden" id="btPcShooterChListFavoritesBookMarksDate_' + i + '" name="btPcShooterChListFavoritesBookMarksDate[]" value="" /></td>';
             fstr += formEntryTDStart + '<input type="hidden" id="btPcShooterChListFavoritesBookMarksUrl_' + i + '" name="btPcShooterChListFavoritesBookMarksUrl[]" value="" /></td>';
             fstr += formEntryTDStart + '</td>';
-            fstr += formEntryTDStart + '</td>';
+            fstr += formEntryTDStart + '<input type="hidden" id="Zsort_' + i + '" name="Zsort[]" value="' + i + '" /></td>';
         }
         fstr += '</tr>';
         jQUSel_EditBookMarks.append(fstr);
@@ -175,6 +175,7 @@ checkBookMark = function (valData, instance) {
 }
 
 saveBookmarksByID = function (id, args) {
+    window.console.log(args);
     $.ajax({
         type: 'POST',
         url: save_bookmarks,
