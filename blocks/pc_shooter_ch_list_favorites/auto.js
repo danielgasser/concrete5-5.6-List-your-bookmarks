@@ -16,6 +16,7 @@
  */
 window.ccm_alSelectFile = function(args) {
     var jData = null;
+    $('#DeleteAll').prop('disabled', true);
     $('#ccm-dialog-loader-wrapper').show();
     $.ajax({
         type: 'GET',
@@ -29,6 +30,7 @@ window.ccm_alSelectFile = function(args) {
                 ccm_addError(ccm_t('parsing-failed'));
                 return false;
             }
+            $('.hide').show();
             createForm(jData);
         }
     });
@@ -86,9 +88,10 @@ createForm = function (l) {
 
         // Construct form string
         fstr += '<tr class="sortable_row" id="bookMarkID_' + n.bookmarkID + '">';
+        fstr += '<td class="zselect"><input id="deleteID_' + n.bookmarkID + '" type="checkbox" /></td>';
         fstr += '<td class="zsort">' + + (i + 1) + '</td>';
         fstr += formEntryTDStart + '<img name="icon" id="icon" src="' + showImg + '" /><input type="hidden" name="btPcShooterChListFavoritesBookMarksIcon[]" id="btPcShooterChListFavoritesBookMarksIcon_' + i + '" value="' + showImg + '" /></td>';
-        fstr += formEntryTDStart + title + '<input class="ccm-input-text' + f + '" type="text" id="btPcShooterChListFavoritesBookMarksText_' + i + '" name="btPcShooterChListFavoritesBookMarksText[]" value="' + replaceTitleText + '" />' + titleEnd + n.bookmarkID + '</td>';
+        fstr += formEntryTDStart + title + '<input class="ccm-input-text' + f + '" type="text" id="btPcShooterChListFavoritesBookMarksText_' + i + '" name="btPcShooterChListFavoritesBookMarksText[]" value="' + replaceTitleText + '" />' + titleEnd + '</td>';
         if (isLink) {
             fstr += formEntryTDStart + '<input class="datepicker_' + i + ' input-small" type="text" id="btPcShooterChListFavoritesBookMarksDate_' + i + '" name="btPcShooterChListFavoritesBookMarksDate[]" value="' + n.btPcShooterChListFavoritesBookMarksDate + '" /></td>';
             fstr += formEntryTDStart + '<input class="span4" type="text" id="btPcShooterChListFavoritesBookMarksUrl_' + i + '" name="btPcShooterChListFavoritesBookMarksUrl[]" value="' + n.btPcShooterChListFavoritesBookMarksUrl + '" />';
@@ -175,6 +178,63 @@ checkBookMark = function (valData, instance) {
     return jData;
 }
 
+deleteSelected = function (obj) {
+    window.console.log(obj)
+    $.ajax({
+        type: 'POST',
+        async: false,
+        url: delete_bookmarks_by_id,
+        data: {
+            bookmarkIDs: obj
+        },
+        success: function(data){
+            var jData = $.parseJSON(data);
+            if (data === null) {
+                ccm_addError(ccm_t('parsing-failed'));
+                return false;
+            }
+            createForm(jData);
+            return false;
+        }
+    });
+}
+
+refreshPosition = function () {
+    var ids = [],
+        j,
+        id,
+        oldid;
+    $.each($('.' + bookmarkStartClass), function (i, n) {
+        j = i + 1;
+        $(this).text(j);
+        //$('[id="Zsort_' + j + '"]').val(j);
+    });
+    $.each($('.inputZsort'), function (i, n) {
+        j = i + 1;
+        id = $(this).parent().parent().attr('id').split('_')[1];
+        oldid = parseInt($(this).attr('id').split('_')[1], 10);
+        $(this).val(i);
+        window.console.log(oldid);
+        ids.push(
+            {
+                bid: id,
+                vale: i
+            });
+    });
+    $.ajax({
+        type: 'POST',
+        url: update_sort,
+        data: {
+            sortage: ids
+        },
+        success: function (data) {
+            jData = $.parseJSON(data);
+            window.console.log(jData);
+        }
+    });
+    window.console.log(ids)
+}
+
 saveBookmarksByID = function (id, args) {
     $.ajax({
         type: 'POST',
@@ -195,14 +255,6 @@ saveAllBookmarksByID = function (ids, args) {
             bookmarkID: ids,
             fieldValues: args
         }
-        //success: function (data) {
-        //    jData = $.parseJSON(data);
-        //    if (data === null) {
-        //        ccm_addError(ccm_t('parsing-failed'));
-        //        return false;
-        //    }
-        //    createForm(jData);
-        //}
     });
 
 }

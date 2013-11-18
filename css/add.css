@@ -16,3 +16,7 @@
     left: 45%;
     width: 40px;
 }
+.file-choose-header {
+    float: left;
+    padding: 1em;
+}

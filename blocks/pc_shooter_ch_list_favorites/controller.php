@@ -29,7 +29,7 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
     /**
      * @var int Add/edit window width
      */
-    protected $btInterfaceWidth = 1250;
+    protected $btInterfaceWidth = 1100;
     /**
      * @var int Add/edit window height
      */
@@ -122,6 +122,7 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
             'no-js-links' => t('No JavaScript-links allowed!'),
             'close' => t('Close'),
             'print' => t('Print'),
+            'sure' => t('Do you really want to delete the selected bookmarks?'),
             'copy' => t('Copy')
         );
     }
@@ -225,6 +226,15 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
     }
 
     /**
+     * Delete bookmarks from db by ID
+     * @param $bookmarkID bookmarkID
+     */
+    public function deleteBookmarkRecordsByID($bookmarkID) {
+        $db = Loader::db();
+        $db->Execute('DELETE FROM ' . $this->bookmarkTable . ' WHERE bookmarkID = ' . $bookmarkID);
+    }
+
+    /**
      * Updates the blockid of bookmarks
      */
     public function updateBookmarkRecordsBlockID() {
@@ -293,6 +303,7 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
         $this->set_block_tool('check_url');
         $this->set_block_tool('save_bookmarks');
         $this->set_block_tool('update_sort');
+        $this->set_block_tool('delete_bookmarks_by_id');
         $this->set_package_tool('parse_html');
         $this->set_package_tool('delete_unused_bookmarks_from_db');
         $this->setHtmlExtension();
@@ -309,6 +320,7 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
         $this->set_block_tool('get_bookmarks');
         $this->set_block_tool('save_bookmarks');
         $this->set_block_tool('update_sort');
+        $this->set_block_tool('delete_bookmarks_by_id');
         $this->set_package_tool('parse_html');
         $this->set_package_tool('delete_unused_bookmarks_from_db');
         $this->setHtmlExtension();

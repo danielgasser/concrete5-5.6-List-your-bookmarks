@@ -18,14 +18,17 @@ $al = Loader::helper('concrete/asset_library');
 $helper_file = Loader::helper('concrete/file');
 $htmlFilter = array("fExtension" => "html");
 $jData = $this->action('get_bookmark_data_json');
+$c = Page::getCurrentPage();
+$c->getCollectionID();
 ?>
-    <script>
+    <script xmlns="http://www.w3.org/1999/html">
     var clear_html_extension_ajax = '<?php echo $clear_html_extension_ajax ?>',
         ajaxCall = '<?= $check_url; ?>',
         parse_html = '<?php echo $parse_html ?>',
         get_bookmarks = '<?php echo $get_bookmarks ?>',
         save_bookmarks = '<?php echo $save_bookmarks ?>',
         update_sort = '<?php echo $update_sort ?>',
+        delete_bookmarks_by_id = '<?php echo $delete_bookmarks_by_id ?>',
         bookMarkData = '<?php echo $jData ?>',
         blockID = '<?php echo $controller->bID ?>',
         BlankImage = '<?php echo $blankImage;  ?>', // 26 Bytes
@@ -40,6 +43,33 @@ $jData = $this->action('get_bookmark_data_json');
         bookmarkStartID = 0,
         bookmarkEndPos = 0;
     $(document).ready(function () {
+        var deleteAll = $('#DeleteAll');
+        deleteAll.attr('disabled', true);
+        $('#tabset a').click(function (ev) {
+            var tab_to_show = $(this).attr('href');
+            $('#tabset li').
+                removeClass('ccm-nav-active').
+                find('a').
+                each(function (ix, elem) {
+                    var tab_to_hide = $(elem).attr('href');
+                    $(tab_to_hide).hide();
+                });
+            $(tab_to_show).show();
+            $(this).parent('li').addClass('ccm-nav-active');
+            return false;
+        }).first().click();
+
+        <?php
+        if ($c->isEditMode()){
+        ?>
+        $('.hide').show();
+        <?php
+          }else {
+          ?>
+        $('.hide').hide();
+        <?php
+        }
+        ?>
         if (blockID.length > 0) {
             $('#ccm-dialog-loader-wrapper').show();
             $.ajax({
@@ -109,109 +139,135 @@ $jData = $this->action('get_bookmark_data_json');
                 items: '.sortable_row',
                 handle: '.sort_handle',
                 start: function(event, ui) {
-                    bookmarkStartClass = $(ui.item[0].children[0]).attr('class');
+                    bookmarkStartClass = $(ui.item[0].children[1]).attr('class');
                     bookmarkStartID = $(ui.item[0]).attr('id');
-                    bookmarkStartPos = $(ui.item[0].children[0]).html();
+                    bookmarkStartPos = $(ui.item[0].children[1]).html();
                 },
                 update: function (event, ui) {
-                    bookmarkEndPos = $(ui.item[0].children[0]).html();
+                    bookmarkEndPos = $(ui.item[0].children[1]).html();
                     refreshPosition();
                 }
             }
         );
         $('.table-condensed').disableSelection();
 
+        $('#deleteAllIDs').live('click', function (){
+            var checkBoxes = $('[id^="deleteID_"]');
+            checkBoxes.each(function () {
+                window.console.log(this);
+                if ($(this).attr('checked')) {
+                    $(this).attr('checked', false);
+                    deleteAll.prop('disabled', true);
+                } else {
+                    $(this).attr('checked', true);
+                    deleteAll.prop('disabled', false);
+                }
+            })
+        })
 
+        $('[id^="deleteID_"]').live('click', function() {
+            if ($(this).attr('checked')) {
+                deleteAll.prop('disabled', false);
+            } else {
+                deleteAll.prop('disabled', true);
+            }
+        })
+
+        deleteAll.live('click', function(e) {
+            var data = [],
+                conf = confirm(ccm_t('sure'));
+            e.preventDefault();
+            if (conf) {
+                $('[id^="deleteID_"]').each(function(i, n) {
+                    if ($(this).attr('checked')) {
+                        data.push({
+                            bookmarkID: $(this).attr('id').split('_')[1]
+                        });
+                    }
+                })
+                console.log(data)
+                deleteSelected(data);
+                return false;
+            }
+        })
     })
-refreshPosition = function(){
-    var ids = [],
-        j,
-        id,
-        oldid;
-    $.each($('.' + bookmarkStartClass), function (i, n) {
-        j = i + 1;
-        $(this).text(j);
-        //$('[id="Zsort_' + j + '"]').val(j);
-    });
-    $.each($('.inputZsort'), function (i, n) {
-        j = i + 1;
-        id = $(this).parent().parent().attr('id').split('_')[1];
-        oldid = parseInt($(this).attr('id').split('_')[1], 10);
-        $(this).val(i);
-        window.console.log(oldid);
-        ids.push(
-        {
-            bid: id,
-            vale: i
-        });
-    });
-    $.ajax({
-        type: 'POST',
-        url: update_sort,
-        data: {
-            sortage: ids
-        },
-        success: function (data) {
-            jData = $.parseJSON(data);
-            window.console.log(jData);
-        }
-    });
-    window.console.log(ids)
-}
+
+
 
 </script>
-<div>
-    <table class="table table-condensed" border="1">
-        <thead>
-            <tr>
-                <td colspan="10">
+    <ul id="tabset" class="ccm-dialog-tabs" style="margin-left: -1px;">
+        <li><a href="#managebookmarks"><?php echo t("Manage bookmarks"); ?></a></li>
+        <li><a href="#blockoptions"><?php echo t("Block options"); ?></a></li>
+    </ul>
+
+    <div id="managebookmarks">
+        <div>
+            <div class="file-choose-header">
+                <?php
+                print $form->hidden('fileLinkText', 'bmf');
+                print $al->file('ccm-b-file', 'fID', t('Choose HTM/HTML- File'), $this->fID, $htmlFilter);
+                ?>
+            </div>
+            <div class="file-choose-header">
+            <?php
+                print $form->text('btPcShooterChListFavoritesBlockText', $this->btPcShooterChListFavoritesBlockText, array('placeholder' => t('Bookmarks Title')));
+                ?>
+            </div>
+            <div class="file-choose-header">
+                <button class="btn hide" id="DeleteAll">
                     <?php
-
-                    print $form->label('btPcShooterChListFavoritesBlockText', t('Bookmarks Title'));
-                    print $form->text('btPcShooterChListFavoritesBlockText', $this->btPcShooterChListFavoritesBlockText);
-                    print $form->hidden('fileLinkText', 'bmf');
-                    print $al->file('ccm-b-file', 'fID', t('Choose HTM/HTML- File'), $this->fID, $htmlFilter);
+                    print t('Delete selected');
                     ?>
+                </button>
+            </div>
+        </div>
+        <table class="table table-condensed">
+            <thead>
+                <tr class="hide">
+                    <td colspan="9">
+                        <?php print t('Entries') . ': <span id="numRecords"></span>'; ?>
                     </td>
-            </tr>
+                </tr>
+                <tr class="hide">
+                    <th colspan="2">
+                        <input id="deleteAllIDs" type="checkbox" />
+                        <?php print t('All'); ?>
+                    </th>
+                    <th>
+                        <?php // Icon; ?>
+                    </th>
+                    <th>
+                        <?php print t('Title'); ?>
+                    </th>
+                    <th>
+                        <?php print t('Added'); ?>
+                    </th>
+                    <th>
+                        <?php print t('www'); ?>
+                    </th>
+                    <th>
+                        <?php print t('Test bookmark'); ?>
+                    </th>
+                    <th>
+                        <?php print t('See header details'); ?>
+                    </th>
+                    <th>
+                        <?php print t('Sort'); ?>
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="editBookmarks">
+            </tbody>
+        </table>
+    </div>
+    <div id="blockoptions">
+        <?php
+        echo $form->label('btPcShooterChListFavoritesBlockMultiBlock', t('Block options'));
+        echo '<br>';
+        echo $form->select('btPcShooterChListFavoritesBlockMultiBlock', array(
+            'multi' => t('Each bookmark in a block'),
+            'one' => t('One block for all bookmarks')), 'multi');
+        ?>
+    </div>
 
-            <tr>
-                <td colspan="10">
-                    <?php print t('Entries') . ': <span id="numRecords"></span>'; ?>
-                </td>
-            </tr>
-            <tr>
-                <th>
-                    #
-                </th>
-                <th>
-                    <?php // Icon; ?>
-                </th>
-                <th>
-                    <?php print t('Title'); ?>
-                </th>
-                <th>
-                    <?php print t('Added'); ?>
-                </th>
-                <th>
-                    <?php print t('www'); ?>
-                </th>
-                <th>
-                    <?php print t('Test bookmark'); ?>
-                </th>
-                <th>
-                    <?php print t('See header details'); ?>
-                </th>
-                <th>
-                    <?php print t('Sort'); ?>
-                </th>
-                <th>
-                    <?php print t('Delete'); ?>
-                </th>
-            </tr>
-        </thead>
-        <tbody id="editBookmarks">
-        </tbody>
-    </table>
-</div>
 <?php
