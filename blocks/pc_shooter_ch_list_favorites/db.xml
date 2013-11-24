@@ -7,7 +7,11 @@
 		</field>
         <field name="btPcShooterChListFavoritesBlockText" type="C" size="255">
         </field>
-        <field name="btPcShooterChListFavoritesBlockMultiBlock" type="C" size="255">
+        <field name="btPcShooterChListFavoritesBlockDisplayBlock" type="C" size="255">
+        </field>
+        <field name="btPcShooterChListFavoritesBlockDisplayFields" type="C" size="255">
+        </field>
+        <field name="btPcShooterChListFavoritesBlockLinksTarget" type="C" size="255">
         </field>
         <field name="fID" type="I">
             <unsigned/>
@@ -22,16 +26,23 @@
         <field name="blockID" type="I">
             <unsigned/>
         </field>
-        <field name="btPcShooterChListFavoritesBookMarksDate" type="D">
+        <field name="btPcShooterChListFavoritesBookMarksDate" type="I">
         </field>
         <field name="btPcShooterChListFavoritesBookMarksIcon" type="B">
+        </field>
+        <field name="btPcShooterChListFavoritesBookMarksIsTitle" type="I1">
+            <unsigned/>
+        </field>
+        <field name="btPcShooterChListFavoritesBookMarksKeyWord" type="C" size="255">
+        </field>
+        <field name="btPcShooterChListFavoritesBookMarksLevel" type="C" size="255">
+        </field>
+        <field name="btPcShooterChListFavoritesBookMarksSort" type="I">
+            <unsigned/>
         </field>
         <field name="btPcShooterChListFavoritesBookMarksText" type="C" size="255">
         </field>
         <field name="btPcShooterChListFavoritesBookMarksUrl" type="C" size="255">
-        </field>
-        <field name="Zsort" type="I">
-            <unsigned/>
         </field>
     </table>
 </schema>

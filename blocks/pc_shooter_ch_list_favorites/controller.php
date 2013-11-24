@@ -93,6 +93,7 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
     public function getBookmarkTableColumnsNames() {
         $db = Loader::db();
         $query = "SELECT ORDINAL_POSITION, COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='" . $this->bookmarkTable . "' AND COLUMN_NAME LIKE '" . $this->bookmarkTable . "%'";
+        Log::addEntry($query);
         return $db->GetAssoc($query);
     }
 
@@ -128,6 +129,39 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
     }
 
     /**
+     * @param $tag
+     * @param $html
+     * @param int $strict
+     * @return array
+     */
+    public function parseHtml ($tag, $html, $strict){
+        $dom = new DOMDocument('1.0', 'iso-8859-1');
+
+        /*** load the html into the object ***/
+        if ($strict == 1) {
+            $dom->loadXML($html);
+        } else {
+            $dom->loadHTML($html);
+        }
+
+        /*** discard white space ***/
+        $dom->preserveWhiteSpace = false;
+
+        /*** the tag by its tag name ***/
+        $content = $dom->getElementsByTagname($tag);
+
+        /*** the array to return ***/
+        $out = array();
+        foreach ($content as $item) {
+            /*** add node value to the out array ***/
+            $out[] = $item->nodeValue;
+        }
+        /*** return the results ***/
+        return $out;
+
+    }
+
+    /**
      * Save bookmarks into DB
      * and sets 'bookMarkData'
      * @param $args Parsed Html-file assoc. array
@@ -137,6 +171,7 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
         $t = '';
         $db = Loader::db();
         $this->deleteBookmarkRecords(PHP_INT_MAX);
+        Log::addEntry($this->createInsertBookmarksQuery($args));
         $db->Execute($this->createInsertBookmarksQuery($args));
         $this->set('bookMarkData', $this->bookMarkData);
     }
@@ -148,16 +183,29 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
      */
     public function createInsertBookmarksQuery($args) {
         $queryStr = 'INSERT INTO ' . $this->bookmarkTable . ' (' . $this->bookmarkTableForeignKeyField . ', ';
-        $queryStr .= implode(', ', array_keys($args[0]));
-        $queryStr .= ', Zsort) VALUES ';
-        Log::addEntry($queryStr);
+        $queryStr .= 'btPcShooterChListFavoritesBookMarksDate,
+                        btPcShooterChListFavoritesBookMarksIcon,
+                        btPcShooterChListFavoritesBookMarksIsTitle,
+                        btPcShooterChListFavoritesBookMarksKeyWord,
+                        btPcShooterChListFavoritesBookMarksLevel,
+                        btPcShooterChListFavoritesBookMarksSort,
+                        btPcShooterChListFavoritesBookMarksUrl,
+                        btPcShooterChListFavoritesBookMarksText';
+        $queryStr .= ') VALUES ';
+        //Log::addEntry($queryStr);
+        $isTitle = false;
+        //Log::addEntry($this->langNoJsLinks);
+        $isTitleLast = $isTitle;
+       // print_r($args);
         $i = 0;
         foreach ($args as $arg) {
             $queryStr .= '(' . PHP_INT_MAX . ', ';
-            foreach ($arg as $value) {
-                $queryStr .= '\'' . $value . '\', ';
+            foreach ($arg as $key => $value) {
+      //          echo $value;
+                $prefix = (is_int($value)) ? '' : '\'';
+                $queryStr .= '\'' . mysql_real_escape_string($value) . '\'' . ', ';
+               // $i++;
             }
-            $queryStr .= $i . ', ';
             $queryStr = substr($queryStr, 0, -2);
             $queryStr .= '), ';
             $i++;
@@ -186,6 +234,9 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
        // exit;
     }
 
+    public function includeLibs($lib){
+        return Loader::Library($lib, $this->pkgHandle);
+    }
     /**
      * Get bookmarks from DB
      * @param $blockID bID
@@ -194,27 +245,31 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
     public function getBookmarkDataRecords($blockID) {
         $db = Loader::db();
 
-        return $db->GetAll('SELECT bookmarkID, btPcShooterChListFavoritesBookMarksIcon, btPcShooterChListFavoritesBookMarksDate, btPcShooterChListFavoritesBookMarksText, btPcShooterChListFavoritesBookMarksUrl, Zsort FROM ' . $this->bookmarkTable . ' WHERE ' . $this->bookmarkTableForeignKeyField . ' = ' . $blockID . ' ORDER BY Zsort ASC');
+        return $db->GetAll('SELECT
+            bookmarkID,
+            btPcShooterChListFavoritesBookMarksDate,
+            btPcShooterChListFavoritesBookMarksIcon,
+            btPcShooterChListFavoritesBookMarksIsTitle,
+            btPcShooterChListFavoritesBookMarksKeyWord,
+            btPcShooterChListFavoritesBookMarksLevel,
+            btPcShooterChListFavoritesBookMarksSort,
+            btPcShooterChListFavoritesBookMarksText,
+            btPcShooterChListFavoritesBookMarksUrl
+             FROM ' . $this->bookmarkTable . ' WHERE ' . $this->bookmarkTableForeignKeyField . ' = ' . $blockID . ' ORDER BY btPcShooterChListFavoritesBookMarksLevel ASC');
     }
 
     public function updateBookmarksByID($bookmarkID, $args) {
         $db = Loader::db();
-        Log::addEntry('UPDATE ' . $this->bookmarkTable . ' SET
-                        btPcShooterChListFavoritesBookMarksIcon = "' . mysql_real_escape_string($args[0]) . '",
-                        btPcShooterChListFavoritesBookMarksText = "' . mysql_real_escape_string($args[1]) . '",
-                        btPcShooterChListFavoritesBookMarksDate = "' . mysql_real_escape_string($args[2]) . '",
-                        btPcShooterChListFavoritesBookMarksUrl = "' . mysql_real_escape_string($args[3]) . '",
-                        Zsort = ' . mysql_real_escape_string($args[4]) . '
-                         WHERE bookmarkID = ' . $bookmarkID);
-
-
         $db->Execute('UPDATE ' . $this->bookmarkTable . ' SET
+                        btPcShooterChListFavoritesBookMarksDate = "' . mysql_real_escape_string($args[1]) . '",
                         btPcShooterChListFavoritesBookMarksIcon = "' . mysql_real_escape_string($args[0]) . '",
+                        btPcShooterChListFavoritesBookMarksIsTitle = "' . mysql_real_escape_string($args[0]) . '",
+                        btPcShooterChListFavoritesBookMarksKeyWord = "' . mysql_real_escape_string($args[2]) . '",
                         btPcShooterChListFavoritesBookMarksText = "' . mysql_real_escape_string($args[1]) . '",
-                        btPcShooterChListFavoritesBookMarksDate = "' . mysql_real_escape_string($args[2]) . '",
+                        btPcShooterChListFavoritesBookMarksLevel = ' . mysql_real_escape_string($args[4]) . ',
+                        btPcShooterChListFavoritesBookMarksSort = ' . mysql_real_escape_string($args[5]) . '
                         btPcShooterChListFavoritesBookMarksUrl = "' . mysql_real_escape_string($args[3]) . '",
-                        Zsort = ' . mysql_real_escape_string($args[4]) . '
-                         WHERE bookmarkID = ' . $bookmarkID);
+                        WHERE bookmarkID = ' . $bookmarkID);
     }
     /**
      * Delete bookmarks from db
@@ -288,11 +343,11 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
      * {@source 3 1}
      */
     public function save($args) {
-        $db = Loader::db();
+        $args['btPcShooterChListFavoritesBlockDisplayFields'] = implode(',', $args['btPcShooterChListFavoritesBlockDisplayFields']);
         parent::save($args);
         $this->clearHtmlExtension($this->getPkgHandle());
         $this->updateBookmarkRecordsBlockID();
-        $this->updateAllBookmarkRecordsSort();
+        //$this->updateAllBookmarkRecordsSort();
         $this->deleteBookmarkRecords(PHP_INT_MAX);
     }
 
@@ -300,6 +355,7 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
      * Adds a block
      */
     public function add() {
+        $html = Loader::helper('html');
         $this->set_block_tool('check_url');
         $this->set_block_tool('save_bookmarks');
         $this->set_block_tool('update_sort');
@@ -309,6 +365,7 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
         $this->setHtmlExtension();
         $this->set('blankImage', $this->blankImage);
         $this->set('bookMarkData', $this->getBookmarkData());
+        $this->addHeaderItem($html->css(BASE_URL . DIR_REL . '/' . DIRNAME_PACKAGES . '/' . $this->getPkgHandle() . '/css/add.css'));
         //FormBuilder::createForm($this->bokkMarkData);
     }
 
@@ -316,6 +373,7 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
      * Block edit
      */
     public function edit() {
+        $html = Loader::helper('html');
         $this->set_block_tool('check_url');
         $this->set_block_tool('get_bookmarks');
         $this->set_block_tool('save_bookmarks');
@@ -326,15 +384,19 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
         $this->setHtmlExtension();
         $this->set('blankImage', $this->blankImage);
         $this->set('bookMarkData', $this->getBookmarkDataRecords($this->bID));
+        $this->addHeaderItem($html->css(BASE_URL . DIR_REL . '/' . DIRNAME_PACKAGES . '/' . $this->getPkgHandle() . '/css/add.css'));
     }
 
     /**
      * Set things for viewing the block...
      */
     public function view() {
+        $html = Loader::helper('html');
         $this->clearHtmlExtension($this->getPkgHandle());
-        Database::setDebug(true);
         $this->set('bookMarkData', $this->getBookmarkDataRecords($this->bID));
+        $this->set('fieldsToShow', explode(',', $this->btPcShooterChListFavoritesBlockDisplayFields));
+        $this->set('linksTarget', $this->btPcShooterChListFavoritesBlockLinksTarget);
+        $this->render('templates/' . $this->btPcShooterChListFavoritesBlockDisplayBlock . '/view');
     }
 
     /**
@@ -342,7 +404,6 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
      * @see parent::delete()
      */
     public function delete() {
-        $db = Loader::db();
         $this->deleteBookmarkRecords($this->bID);
         $this->deleteBookmarkRecords(PHP_INT_MAX);
         parent::delete();
@@ -354,16 +415,15 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
      * @return mixed Errors
      */
     public function validate($args) {
-        //$e = Loader::helper('validation/error');
-        //if ($args['fID'] < 1) {
-        //    $e->add(t('You must select a file.'));
-        //}
+        $e = Loader::helper('validation/error');
+        if ($args['fID'] < 1) {
+            $e->add(t('You must select a file.'));
+        }
         //if (trim($args['fileLinkText']) == '') {
         //    $e->add(t('You must give your file a link.'));
         //}
 //
-        //return $e;
-        return;
+        return $e;
     }
 
     /**
@@ -378,6 +438,9 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
      */
     public function on_page_view() {
         $html = Loader::helper('html');
+        //$this->addHeaderItem($html->css('templates/' . $this->btPcShooterChListFavoritesBlockDisplayBlock . '/view.css'));
+        $this->addHeaderItem($html->css(BASE_URL . DIR_REL . '/' . DIRNAME_PACKAGES . '/' . $this->getPkgHandle() . '/blocks/' . $this->getPkgHandle() . '/templates/' . $this->btPcShooterChListFavoritesBlockDisplayBlock . '/view.css'));
+        $this->addHeaderItem($html->css(BASE_URL . DIR_REL . '/' . DIRNAME_PACKAGES . '/' . $this->getPkgHandle() . '/css/add.css'));
         $this->addHeaderItem($html->javascript('jquery.ui.js'));
         $this->deleteBookmarkRecords(PHP_INT_MAX);
     }

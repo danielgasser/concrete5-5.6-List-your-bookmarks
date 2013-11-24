@@ -12,7 +12,6 @@
  */
 
 defined('C5_EXECUTE') or die("Access Denied.");
-echo 'display: ' . $btPcShooterChListFavoritesBlockDisplayBlock;
 $f = $controller->getFileObject();
 $fp = new Permissions($f);
 $blockType = BlockType::getByHandle('pc_shooter_ch_list_favorites');

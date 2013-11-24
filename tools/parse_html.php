@@ -14,135 +14,95 @@
 
 defined('C5_EXECUTE') or die("Access Denied.");
 
+
+
 $fileID = mysql_real_escape_string($_GET['fileID']);
-$pkgHandle = mysql_real_escape_string($_GET['pkg']);
-$bc = new PcShooterChListFavoritesBlockController();
 $file = File::getByID($fileID);
 $fv = $file->getRecentVersion();
-$uploadFile = $fv->getDownloadURL();
+$uploadFile = $fv->getRelativePath(true);
 
-$langNoJsLinks = t('No JavaScript-links allowed!');
-$tableColumns = $bc->getBookmarkTableColumnsNames();
-$jsonData = array();
-$newArr = array();
-$oldKey = null;
-$newKey = null;
+$bc = new PcShooterChListFavoritesBlockController();
+
+$blankImage = $bc->blankImage;
+
 $dateFormat = $bc->getDateFormat();
+
+$html = file_get_contents($uploadFile);
+
+$dom = new DOMDocument;
+
+@$dom->loadHTMLFile($uploadFile);
+$dom->preserveWhiteSpace = false;
 /**
- * Sort $tableColumns like $buffer:
- * Using $db->getAssoc,
- * the db-column INFORMATION_SCHEMA.COLUMNS.ORDINAL_POSITION
- * is used as array-key
- *
- *          table columns:  $buffer:
- * url:     6               0
- * date:    3               1
- * icon:    4               2
- * text:    5               3
- *
- */
-$colSortKeys = array(6, 3, 4, 5);
+ * $tableColumns = array_values($bc->getBookmarkTableColumnsNames());
+ *     [0] => btPcShooterChListFavoritesBookMarksDate
+ *     [1] => btPcShooterChListFavoritesBookMarksIcon
+ *     [2] => btPcShooterChListFavoritesBookMarksText
+ *     [3] => btPcShooterChListFavoritesBookMarksUrl
+ *     [4] => btPcShooterChListFavoritesBookMarksLevel
+ *     [5] => btPcShooterChListFavoritesBookMarksSort
 
+ */
+$xpath = new DOMXPath($dom);
+$unusedTags = $xpath->query('//meta | //title | //body | //h1 | //hr');
+$unusedLen = $unusedTags->length;
+
+$tagObj = $xpath->query('//dl//h3 | //dl//a');
+$len = $tagObj->length ;
+$oldDepth = 0;
+$data = array();
+$noJS = t('No JavaScript-links allowed!');
 /**
- * Search & replace vars
+ * lockID,
+btPcShooterChListFavoritesBookMarksDate,
+btPcShooterChListFavoritesBookMarksIcon,
+btPcShooterChListFavoritesBookMarksIsTitle,
+btPcShooterChListFavoritesBookMarksKeyWord,
+btPcShooterChListFavoritesBookMarksLevel,
+btPcShooterChListFavoritesBookMarksSort,
+btPcShooterChListFavoritesBookMarksUrl,
+btPcShooterChListFavoritesBookMarksText
  */
-$href = '<DT><A HREF=';
-$h3 = '<DT><H3';
-$h3a = '</A>';
-$h3e = '</H3>';
-// <a> attributes
-$lm[] = ' LAST_MODIFIED=';
-$lm[] = ' ADD_DATE=';
-$lm[] = ' ICON=';
-$parseDelimiter = '@||@';
-
-/**
- * Replace tags
- */
-$str = str_replace($href, $parseDelimiter, file_get_contents($uploadFile));
-$str = str_replace($h3, $parseDelimiter, $str);
-//$str = str_replace($h3e, $parseDelimiter, $str);
-
-$buffer = explode($parseDelimiter, $str);
-
-/**
- * Cut off the first array entry: "Bookmarks"
- */
-array_splice($buffer, 0, 1);
-
-$i = 0;
-while ($i < sizeof($buffer)) {
-    $buffer[$i] = explode('"', $buffer[$i]);
-    $j = 0;
-
-    while ($j < sizeof($buffer[$i])) {
-        // Deletes the <a> attributes
-        if (in_array($buffer[$i][$j], $lm)) {
-            array_splice($buffer[$i], $j, 1);
+$nodeZero = getDepth($tagObj->item(0));
+for ($i = 0; $i < $len; $i++) {
+    $data[$i]['btPcShooterChListFavoritesBookMarksDate'] = $tagObj->item($i)->getAttribute('add_date');
+    $data[$i]['btPcShooterChListFavoritesBookMarksIcon'] = ($tagObj->item($i)->getAttribute('icon') == '') ? $blankImage : $tagObj->item($i)->getAttribute('icon');
+    $data[$i]['btPcShooterChListFavoritesBookMarksIsTitle'] = ($tagObj->item($i)->tagName == 'h3') ? true : false;
+    $data[$i]['btPcShooterChListFavoritesBookMarksKeyWord'] = ($tagObj->item($i)->getAttribute('shortcuturl')) == '' ? 'no-keyword' : $tagObj->item($i)->getAttribute('shortcuturl');
+   // $d = -1;
+    //$d += getDepth($tagObj->item($i));
+    $data[$i]['btPcShooterChListFavoritesBookMarksLevel'] = strtolower($tagObj->item($i)->nodeValue);
+    if ($tagObj->item($i)->tagName == 'h3') {
+        $data[$i]['btPcShooterChListFavoritesBookMarksSort'] = $i;
+        if (strpos($tagObj->item($i)->getAttribute('href'), 'javascript:') !== false){
+            $data[$i]['btPcShooterChListFavoritesBookMarksUrl'] = 'no-js';
         }
-        // Deletes empty entries
-        if (empty($buffer[$i][$j]) || !isset($buffer[$i][$j]) || $buffer[$i][$j] == '' || $buffer[$i][$j][0] == ' ') {
-            array_splice($buffer[$i], $j, 1);
-        }
-        // Deletes ">" at first place of string, don't ask me why it's there
-        if ($buffer[$i][$j][0] == '>'){
-            $buffer[$i][$j][0] = '';
-        }
-        // Disallow JS-links
-        if (stripos($buffer[$i][$j], 'javascript:') !== false) {
-            $jsonData['errorMsg'][] = $langNoJsLinks;
-            $buffer[$i][$j] = $langNoJsLinks;
-        }
-        // Check, if it's a title
-        if (strpos($buffer[$i][$j], '</H3>') !== false) {
-            $newArr[$i][$tableColumns[$colSortKeys[$j]]] = trim(strip_tags('title_' . preg_replace('/[[:cntrl:]]/i', '', $buffer[$i][$j])));
-        } else {
-            $newArr[$i][$tableColumns[$colSortKeys[$j]]] = trim(strip_tags(preg_replace('/[[:cntrl:]]/i', '', $buffer[$i][$j])));
-        }
-        // Set a formatted date from timestamp
-        if ($tableColumns[$colSortKeys[$j]] == 'btPcShooterChListFavoritesBookMarksDate') {
-            //Log::addEntry($tableColumns[$colSortKeys[$j]]);
-            $dtStr = date($dateFormat, intval($buffer[$i][$j]));
-            $newArr[$i][$tableColumns[$colSortKeys[$j]]] = $dtStr;
-        }
-        $j++;
+    } else {
+        //$data[$i]['btPcShooterChListFavoritesBookMarksLevel'] = $oldDepth;
+        $data[$i]['btPcShooterChListFavoritesBookMarksSort'] = $i;
     }
-    $j = 0;
-    $counter = 0;
-    $lastKey = 0;
-    foreach ($tableColumns as $tableKey => $tableValue) {
-        $k = 0;
-        foreach ($newArr[$i] as $newArrKey => $newArrVal ) {
-            $lastKey = $newArrKey;
-            if ($newArrKey == $tableValue) {
-                $counter++;
-                break;
-            }
-            else {
-                $counter = 0;
-                $val = $newArr[$i][$lastKey];
-                $newKey = $tableValue;
-            }
-            $k++;
-        }
-        if ($counter == 0) {
-            $e = 'red';
-            $newArr[$i][$newKey] = $val;
-            $newArr[$i][$lastKey] = $blankImage;
-        } else {
-            $e = 'black';
-        }
-
-        $j++;
-    }
-    $i++;
+    $data[$i]['btPcShooterChListFavoritesBookMarksUrl'] = ($tagObj->item($i)->getAttribute('href') == '') ? 'no-url' : $tagObj->item($i)->getAttribute('href');
+    $data[$i]['btPcShooterChListFavoritesBookMarksText'] = $tagObj->item($i)->nodeValue;
+    //$oldDepth = $d;
+    //$d = 0;
 }
 
-$jsonData = $newArr;
-// That's it. Send it back to the client & controller
-
-$bc->setBookmarkData($newArr);
+function getDepth($node) {
+    $depth = -1;
+    while ($node != null) {
+        $depth++;
+        $node = $node->parentNode;
+    }
+    return $depth;
+}
+/*
+echo '<pre>';
+print_r($data);
+echo '</pre>';
+*/
+$bc->setBookmarkData($data);
 $realNew = $bc->getBookmarkDataRecords(PHP_INT_MAX);
+
 echo json_encode($realNew);
 
 exit;

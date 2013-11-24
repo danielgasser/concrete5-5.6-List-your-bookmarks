@@ -15,6 +15,7 @@
  * @param args
  */
 window.ccm_alSelectFile = function(args) {
+    "use strict";
     var jData = null;
     $('#DeleteAll').prop('disabled', true);
     $('#ccm-dialog-loader-wrapper').show();
@@ -27,14 +28,42 @@ window.ccm_alSelectFile = function(args) {
         success: function (data) {
             jData = $.parseJSON(data);
             if (data === null) {
-                ccm_addError(ccm_t('parsing-failed'));
+                window.ccm_addError(window.ccm_t('parsing-failed'));
                 return false;
             }
             $('.hide').show();
             createForm(jData);
         }
     });
-    jQuery.fn.dialog.closeTop();
+    if (typeof(ccm_chooseAsset) == 'function') {
+        var qstring = '';
+        if (typeof(args) == 'object') {
+            for (i = 0; i < args.length; i++) {
+                qstring += 'fID[]=' + args[i] + '&';
+            }
+        } else {
+            qstring += 'fID=' + args;
+        }
+
+        $.getJSON(CCM_TOOLS_PATH + '/files/get_data.php?' + qstring, function (resp) {
+            ccm_parseJSON(resp, function () {
+                for (i = 0; i < resp.length; i++) {
+                    ccm_chooseAsset(resp[i]);
+                }
+                jQuery.fn.dialog.closeTop();
+            });
+        });
+
+    } else {
+        if (typeof(args) == 'object') {
+            for (i = 0; i < args.length; i++) {
+                ccm_triggerSelectFile(args[i]);
+            }
+        } else {
+            ccm_triggerSelectFile(args);
+        }
+        jQuery.fn.dialog.closeTop();
+    }
 }
 
 /**
@@ -53,45 +82,48 @@ window.ccm_blockWindowClose = function() {
 createForm = function (l) {
     var fstr = '',
         formEntryTDStart = '<td>',
-        showImg,
         titleFlag = 'title_',
         title = '',
         titleEnd = '',
-        replaceTitleText = '',
+        fi = '',
         oddEven,
         f,
+        j = 0,
         isLink = true,
-        blankImg = BlankImage,
+        tab = 0,
         jQUSel_EditBookMarks = $('#editBookmarks'),
         updateTestbookMarkValue = 'testbookmark_';
 
      //TODO in Version 2.0: add icons
      //var fstr = '<div class="formentry"><input type="file" id="btPcShooterChListFavoritesIcon" name="btPcShooterChListFavoritesIcon[]" value="' + l.icon + '" /></div>';
     jQUSel_EditBookMarks.html('');
-
+    window.console.log(l);
     $.each(l, function(i, n){
-        showImg = (n.btPcShooterChListFavoritesBookMarksIcon === null || n.btPcShooterChListFavoritesBookMarksIcon.indexOf('data:image') === -1) ? blankImg : n.btPcShooterChListFavoritesBookMarksIcon;
-        if (n.btPcShooterChListFavoritesBookMarksText.indexOf(titleFlag) > -1) {
-            replaceTitleText = n.btPcShooterChListFavoritesBookMarksText.substr(titleFlag.length, n.btPcShooterChListFavoritesBookMarksText.length);
+        if (n.btPcShooterChListFavoritesBookMarksIsTitle === '1') {
             title = '<h3>';
             titleEnd = '</h3>';
             isLink = false;
             f = ' ' + titleFlag;
+            fi = '<img src="' + folderImg + '" />';
         } else {
-            replaceTitleText = n.btPcShooterChListFavoritesBookMarksText;
             isLink = true;
             title = '';
             titleEnd = '';
             f = '';
+            fi = '';
         }
         oddEven = (i % 2 === 0) ? 'even' : 'odd';
-
+        tab = '';
+        for(j= 0; j < n.btPcShooterChListFavoritesBookMarksLevel - 5; j += 1){
+            tab += '<img src="' + BlankImage + '" style="width: 7px" />';
+        }
         // Construct form string
         fstr += '<tr class="sortable_row" id="bookMarkID_' + n.bookmarkID + '">';
-        fstr += '<td class="zselect"><input id="deleteID_' + n.bookmarkID + '" type="checkbox" /></td>';
-        fstr += '<td class="zsort">' + + (i + 1) + '</td>';
-        fstr += formEntryTDStart + '<img name="icon" id="icon" src="' + showImg + '" /><input type="hidden" name="btPcShooterChListFavoritesBookMarksIcon[]" id="btPcShooterChListFavoritesBookMarksIcon_' + i + '" value="' + showImg + '" /></td>';
-        fstr += formEntryTDStart + title + '<input class="ccm-input-text' + f + '" type="text" id="btPcShooterChListFavoritesBookMarksText_' + i + '" name="btPcShooterChListFavoritesBookMarksText[]" value="' + replaceTitleText + '" />' + titleEnd + '</td>';
+        //fstr += '<td>' + tab + fi + '</td>';
+        fstr += '<td class="zselect"><input id="deleteID_' + n.bookmarkID + '" type="checkbox" />' + tab + fi + '</td>';
+        fstr += '<td class="zsort">' + n.btPcShooterChListFavoritesBookMarksLevel + '|' + (i + 1) + '</td>';
+        fstr += formEntryTDStart + '<img name="icon" id="icon" src="' + n.btPcShooterChListFavoritesBookMarksIcon + '" /><input type="hidden" name="btPcShooterChListFavoritesBookMarksIcon[]" id="btPcShooterChListFavoritesBookMarksIcon_' + i + '" value="' + n.btPcShooterChListFavoritesBookMarksIcon + '" /></td>';
+        fstr += formEntryTDStart + title + '<input class="ccm-input-text' + f + '" type="text" id="btPcShooterChListFavoritesBookMarksText_' + i + '" name="btPcShooterChListFavoritesBookMarksText[]" value="' + n.btPcShooterChListFavoritesBookMarksText + '" />' + titleEnd + '</td>';
         if (isLink) {
             fstr += formEntryTDStart + '<input class="datepicker_' + i + ' input-small" type="text" id="btPcShooterChListFavoritesBookMarksDate_' + i + '" name="btPcShooterChListFavoritesBookMarksDate[]" value="' + n.btPcShooterChListFavoritesBookMarksDate + '" /></td>';
             fstr += formEntryTDStart + '<input class="span4" type="text" id="btPcShooterChListFavoritesBookMarksUrl_' + i + '" name="btPcShooterChListFavoritesBookMarksUrl[]" value="' + n.btPcShooterChListFavoritesBookMarksUrl + '" />';

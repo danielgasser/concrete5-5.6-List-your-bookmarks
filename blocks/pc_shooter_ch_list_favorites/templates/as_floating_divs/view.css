@@ -1,0 +1,36 @@
+#loader {
+    position: absolute;
+    top: 50%;
+    left: 45%;
+    width: 40px;
+}
+
+.file-choose-header {
+    float: left;
+    padding: 1em;
+}
+
+.bookmark-row {
+    border-bottom: 1px solid #66CC00;
+    margin: 1em;
+}
+.row {
+    float: left;
+    border-left: 1px solid #66CC00;
+    padding: 1em;
+    max-width: 25%;
+}
+.row-num-1 {
+    float: left;
+    border-left: 1px solid #66CC00;
+    max-width: 35px;
+    min-width: 35px;
+}
+.row-num-2 {
+    float: left;
+    border-left: 1px solid #66CC00;
+}
+.row-num-3 {
+    float: left;
+    border-left: 1px solid #66CC00;
+}

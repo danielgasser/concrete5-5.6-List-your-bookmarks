@@ -20,10 +20,23 @@ $htmlFilter = array("fExtension" => "html");
 $jData = $this->action('get_bookmark_data_json');
 $c = Page::getCurrentPage();
 $c->getCollectionID();
+$blockType = BlockType::getByHandle('pc_shooter_ch_list_favorites');
+$temp = $blockType->getBlockTypeCustomTemplates();
+foreach ($temp as $key => $value) {
+    $templates[$value] = t(ucfirst(str_replace('_', ' ', $value)));
+}
+$cols = $controller->getBookmarkTableColumnsNames();
+$columns['Counter'] = t('Counter');
+foreach ($cols as $key => $value) {
+    $columns[$value] = substr($value, 35, strlen($value));
+}
+$fieldsToShow = explode(',', $btPcShooterChListFavoritesBlockDisplayFields);
+
 ?>
+
     <script xmlns="http://www.w3.org/1999/html">
     var clear_html_extension_ajax = '<?php echo $clear_html_extension_ajax ?>',
-        ajaxCall = '<?= $check_url; ?>',
+        ajaxCall = '<?php echo $check_url; ?>',
         parse_html = '<?php echo $parse_html ?>',
         get_bookmarks = '<?php echo $get_bookmarks ?>',
         save_bookmarks = '<?php echo $save_bookmarks ?>',
@@ -35,6 +48,7 @@ $c->getCollectionID();
         delete_unused_bookmarks_from_db = '<?php echo $delete_unused_bookmarks_from_db; ?>',
         pkgHandle = '<?php echo $controller->getPkgHandle(); ?>',
         jData = null,
+        folderImg = '<?php echo BASE_URL . DIR_REL . '/' . DIRNAME_PACKAGES . '/pc_shooter_ch_list_favorites/css/images/folder-small.png' ?>',
         jDt = null,
         BTStr_seeErrors = 'seeErrors_',
         BTStr_checkUrl = 'testbookmark_',
@@ -45,9 +59,9 @@ $c->getCollectionID();
     $(document).ready(function () {
         var deleteAll = $('#DeleteAll');
         deleteAll.attr('disabled', true);
-        $('#tabset a').click(function (ev) {
+        $('#pc-shooter-ch-list-favorites-tabset a').click(function (ev) {
             var tab_to_show = $(this).attr('href');
-            $('#tabset li').
+            $('#pc-shooter-ch-list-favorites-tabset li').
                 removeClass('ccm-nav-active').
                 find('a').
                 each(function (ix, elem) {
@@ -191,26 +205,31 @@ $c->getCollectionID();
             }
         })
     })
-
-
-
 </script>
-    <ul id="tabset" class="ccm-dialog-tabs" style="margin-left: -1px;">
-        <li><a href="#managebookmarks"><?php echo t("Manage bookmarks"); ?></a></li>
-        <li><a href="#blockoptions"><?php echo t("Block options"); ?></a></li>
-    </ul>
-
-    <div id="managebookmarks">
+<style>
+    /*.file-choose-header {
+        float: left;
+        padding: 1em;
+    }*/
+</style>
+    <div>
+        <ul id="pc-shooter-ch-list-favorites-tabset" class="ccm-dialog-tabs" style="margin-left: -1px">
+            <li><a href="#manage-bookmarks"><?php echo t("Manage bookmarks"); ?></a></li>
+            <li><a href="#block-options"><?php echo t("Block options"); ?></a></li>
+        </ul>
+    </div>
+    <div id="manage-bookmarks">
         <div>
             <div class="file-choose-header">
                 <?php
                 print $form->hidden('fileLinkText', 'bmf');
                 print $al->file('ccm-b-file', 'fID', t('Choose HTM/HTML- File'), $this->fID, $htmlFilter);
+                echo $this->fID;
                 ?>
             </div>
             <div class="file-choose-header">
             <?php
-                print $form->text('btPcShooterChListFavoritesBlockText', $this->btPcShooterChListFavoritesBlockText, array('placeholder' => t('Bookmarks Title')));
+                print $form->text('btPcShooterChListFavoritesBlockText', $btPcShooterChListFavoritesBlockText, array('placeholder' => t('Bookmarks Title')));
                 ?>
             </div>
             <div class="file-choose-header">
@@ -260,14 +279,44 @@ $c->getCollectionID();
             </tbody>
         </table>
     </div>
-    <div id="blockoptions">
-        <?php
-        echo $form->label('btPcShooterChListFavoritesBlockMultiBlock', t('Block options'));
-        echo '<br>';
-        echo $form->select('btPcShooterChListFavoritesBlockMultiBlock', array(
-            'multi' => t('Each bookmark in a block'),
-            'one' => t('One block for all bookmarks')), 'multi');
-        ?>
+    <div id="block-options">
+        <div class="file-choose-header">
+            <?php
+            echo '<h4>' . t('Block') . '-' . t('View') . '</h4>';
+            echo $form->select('btPcShooterChListFavoritesBlockDisplayBlock', $templates, $btPcShooterChListFavoritesBlockDisplayBlock);
+            ?>
+        </div>
+        <div class="file-choose-header">
+            <?php
+            echo '<h4>' . t('Fields to show') . '</h4>';
+            foreach ($columns as $key => $c) {
+                echo '<label class="checkbox">';
+                if (sizeof($btPcShooterChListFavoritesBlockDisplayFields) > 0) {
+                    if (in_array($key, $fieldsToShow)) {
+                        echo $form->checkbox('btPcShooterChListFavoritesBlockDisplayFields[]', $key, true) . ' ' . t($c);
+                    } else{
+                        echo $form->checkbox('btPcShooterChListFavoritesBlockDisplayFields[]', $key, false) . ' ' . t($c);
+                    }
+                } else {
+                    echo $form->checkbox('btPcShooterChListFavoritesBlockDisplayFields[]', $key, true) . ' ' . t($c);
+                }
+                echo '</label>';
+            }
+            ?>
+        </div>
+        <div class="file-choose-header">
+            <?php
+            $target = array(
+                '_blank' => t('Opens the linked document in a new window or tab'),
+                '_self' => t('Opens the linked document in the same frame as it was clicked (this is default)'),
+                '_parent' => t('Opens the linked document in the parent frame'),
+                '_top' => t('Opens the linked document in the full body of the window')
+            );
+            echo '<h4>' . t('Link') . '-' . t('Target') . '</h4>';
+            echo $form->select('btPcShooterChListFavoritesBlockLinksTarget', $target, $btPcShooterChListFavoritesBlockLinksTarget);
+            echo '(' . $btPcShooterChListFavoritesBlockLinksTarget . ')';
+            ?>
+        </div>
     </div>
 
 <?php
