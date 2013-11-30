@@ -7,6 +7,11 @@
  * @filesource
  */
 
+//TODO 1. update level on sort
+//TODO 2. folder structure in edit
+//TODO 3. updateAllBookmarkRecordsSort
+//TODO 4. Views
+
 defined('C5_EXECUTE') or die("Access Denied.");
 
 /**
@@ -255,7 +260,7 @@ class PcShooterChListFavoritesBlockController extends Concrete5_Controller_Block
             btPcShooterChListFavoritesBookMarksSort,
             btPcShooterChListFavoritesBookMarksText,
             btPcShooterChListFavoritesBookMarksUrl
-             FROM ' . $this->bookmarkTable . ' WHERE ' . $this->bookmarkTableForeignKeyField . ' = ' . $blockID . ' ORDER BY btPcShooterChListFavoritesBookMarksLevel ASC');
+             FROM ' . $this->bookmarkTable . ' WHERE ' . $this->bookmarkTableForeignKeyField . ' = ' . $blockID . ' ORDER BY btPcShooterChListFavoritesBookMarksSort ASC, btPcShooterChListFavoritesBookMarksLevel ASC');
     }
 
     public function updateBookmarksByID($bookmarkID, $args) {

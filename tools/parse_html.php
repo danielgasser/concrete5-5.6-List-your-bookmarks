@@ -11,10 +11,7 @@
  * @package List Your Bookmarks Tool file: parses bookmark file
  */
 
-
 defined('C5_EXECUTE') or die("Access Denied.");
-
-
 
 $fileID = mysql_real_escape_string($_GET['fileID']);
 $file = File::getByID($fileID);
@@ -47,59 +44,43 @@ $xpath = new DOMXPath($dom);
 $unusedTags = $xpath->query('//meta | //title | //body | //h1 | //hr');
 $unusedLen = $unusedTags->length;
 
-$tagObj = $xpath->query('//dl//h3 | //dl//a');
+$tagObj = $xpath->query('//dt//h3 | //dt//a');
 $len = $tagObj->length ;
-$oldDepth = 0;
+$depth = 0;
 $data = array();
 $noJS = t('No JavaScript-links allowed!');
-/**
- * lockID,
-btPcShooterChListFavoritesBookMarksDate,
-btPcShooterChListFavoritesBookMarksIcon,
-btPcShooterChListFavoritesBookMarksIsTitle,
-btPcShooterChListFavoritesBookMarksKeyWord,
-btPcShooterChListFavoritesBookMarksLevel,
-btPcShooterChListFavoritesBookMarksSort,
-btPcShooterChListFavoritesBookMarksUrl,
-btPcShooterChListFavoritesBookMarksText
- */
+
 $nodeZero = getDepth($tagObj->item(0));
+$depth = 0;
 for ($i = 0; $i < $len; $i++) {
-    $data[$i]['btPcShooterChListFavoritesBookMarksDate'] = $tagObj->item($i)->getAttribute('add_date');
+    $date =date($dateFormat, $tagObj->item($i)->getAttribute('add_date'));
+    $data[$i]['btPcShooterChListFavoritesBookMarksDate'] = $date;//$tagObj->item($i)->getAttribute('add_date');
     $data[$i]['btPcShooterChListFavoritesBookMarksIcon'] = ($tagObj->item($i)->getAttribute('icon') == '') ? $blankImage : $tagObj->item($i)->getAttribute('icon');
     $data[$i]['btPcShooterChListFavoritesBookMarksIsTitle'] = ($tagObj->item($i)->tagName == 'h3') ? true : false;
     $data[$i]['btPcShooterChListFavoritesBookMarksKeyWord'] = ($tagObj->item($i)->getAttribute('shortcuturl')) == '' ? 'no-keyword' : $tagObj->item($i)->getAttribute('shortcuturl');
-   // $d = -1;
-    //$d += getDepth($tagObj->item($i));
-    $data[$i]['btPcShooterChListFavoritesBookMarksLevel'] = strtolower($tagObj->item($i)->nodeValue);
+    $depth = substr_count($tagObj->item($i)->getNodePath(), 'dl');
     if ($tagObj->item($i)->tagName == 'h3') {
-        $data[$i]['btPcShooterChListFavoritesBookMarksSort'] = $i;
-        if (strpos($tagObj->item($i)->getAttribute('href'), 'javascript:') !== false){
-            $data[$i]['btPcShooterChListFavoritesBookMarksUrl'] = 'no-js';
-        }
+        $data[$i]['btPcShooterChListFavoritesBookMarksLevel'] = $depth;
     } else {
-        //$data[$i]['btPcShooterChListFavoritesBookMarksLevel'] = $oldDepth;
-        $data[$i]['btPcShooterChListFavoritesBookMarksSort'] = $i;
+        $data[$i]['btPcShooterChListFavoritesBookMarksLevel'] = $oldDepth;
     }
+    $data[$i]['btPcShooterChListFavoritesBookMarksLevel'] = $depth;
+    $data[$i]['btPcShooterChListFavoritesBookMarksSort'] = $i;
     $data[$i]['btPcShooterChListFavoritesBookMarksUrl'] = ($tagObj->item($i)->getAttribute('href') == '') ? 'no-url' : $tagObj->item($i)->getAttribute('href');
     $data[$i]['btPcShooterChListFavoritesBookMarksText'] = $tagObj->item($i)->nodeValue;
-    //$oldDepth = $d;
-    //$d = 0;
+    $oldDepth = $depth;
 }
 
 function getDepth($node) {
-    $depth = -1;
+    $d = 0;
+   // echo $node->tagName . "\n";
     while ($node != null) {
-        $depth++;
         $node = $node->parentNode;
+        $d++;
     }
-    return $depth;
+    return $d;
 }
-/*
-echo '<pre>';
-print_r($data);
-echo '</pre>';
-*/
+
 $bc->setBookmarkData($data);
 $realNew = $bc->getBookmarkDataRecords(PHP_INT_MAX);
 

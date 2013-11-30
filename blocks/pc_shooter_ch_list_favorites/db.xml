@@ -26,7 +26,7 @@
         <field name="blockID" type="I">
             <unsigned/>
         </field>
-        <field name="btPcShooterChListFavoritesBookMarksDate" type="I">
+        <field name="btPcShooterChListFavoritesBookMarksDate" type="D">
         </field>
         <field name="btPcShooterChListFavoritesBookMarksIcon" type="B">
         </field>
@@ -35,7 +35,8 @@
         </field>
         <field name="btPcShooterChListFavoritesBookMarksKeyWord" type="C" size="255">
         </field>
-        <field name="btPcShooterChListFavoritesBookMarksLevel" type="C" size="255">
+        <field name="btPcShooterChListFavoritesBookMarksLevel" type="I">
+            <unsigned/>
         </field>
         <field name="btPcShooterChListFavoritesBookMarksSort" type="I">
             <unsigned/>

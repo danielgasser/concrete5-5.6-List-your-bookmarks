@@ -15,7 +15,6 @@
  * @param args
  */
 window.ccm_alSelectFile = function(args) {
-    "use strict";
     var jData = null;
     $('#DeleteAll').prop('disabled', true);
     $('#ccm-dialog-loader-wrapper').show();
@@ -28,7 +27,7 @@ window.ccm_alSelectFile = function(args) {
         success: function (data) {
             jData = $.parseJSON(data);
             if (data === null) {
-                window.ccm_addError(window.ccm_t('parsing-failed'));
+                ccm_addError(ccm_t('parsing-failed'));
                 return false;
             }
             $('.hide').show();
@@ -90,12 +89,8 @@ createForm = function (l) {
         f,
         j = 0,
         isLink = true,
-        tab = 0,
-        jQUSel_EditBookMarks = $('#editBookmarks'),
-        updateTestbookMarkValue = 'testbookmark_';
+        jQUSel_EditBookMarks = $('#editBookmarks');
 
-     //TODO in Version 2.0: add icons
-     //var fstr = '<div class="formentry"><input type="file" id="btPcShooterChListFavoritesIcon" name="btPcShooterChListFavoritesIcon[]" value="' + l.icon + '" /></div>';
     jQUSel_EditBookMarks.html('');
     window.console.log(l);
     $.each(l, function(i, n){
@@ -104,7 +99,7 @@ createForm = function (l) {
             titleEnd = '</h3>';
             isLink = false;
             f = ' ' + titleFlag;
-            fi = '<img src="' + folderImg + '" />';
+            fi = '<img style="padding-left: 4px" src="' + folderImg + '" />';
         } else {
             isLink = true;
             title = '';
@@ -113,15 +108,12 @@ createForm = function (l) {
             fi = '';
         }
         oddEven = (i % 2 === 0) ? 'even' : 'odd';
-        tab = '';
-        for(j= 0; j < n.btPcShooterChListFavoritesBookMarksLevel - 5; j += 1){
-            tab += '<img src="' + BlankImage + '" style="width: 7px" />';
-        }
+
         // Construct form string
         fstr += '<tr class="sortable_row" id="bookMarkID_' + n.bookmarkID + '">';
-        //fstr += '<td>' + tab + fi + '</td>';
-        fstr += '<td class="zselect"><input id="deleteID_' + n.bookmarkID + '" type="checkbox" />' + tab + fi + '</td>';
-        fstr += '<td class="zsort">' + n.btPcShooterChListFavoritesBookMarksLevel + '|' + (i + 1) + '</td>';
+        j = (n.btPcShooterChListFavoritesBookMarksLevel <= 1) ? 4 : n.btPcShooterChListFavoritesBookMarksLevel * 20;
+        fstr += '<td class="zselect" style="padding-left: ' + j + 'px; width: 36px"><input id="deleteID_' + n.bookmarkID + '" type="checkbox" />' + fi + '</td>';
+        fstr += '<td class="zsort">' + n.btPcShooterChListFavoritesBookMarksSort + '</td>';
         fstr += formEntryTDStart + '<img name="icon" id="icon" src="' + n.btPcShooterChListFavoritesBookMarksIcon + '" /><input type="hidden" name="btPcShooterChListFavoritesBookMarksIcon[]" id="btPcShooterChListFavoritesBookMarksIcon_' + i + '" value="' + n.btPcShooterChListFavoritesBookMarksIcon + '" /></td>';
         fstr += formEntryTDStart + title + '<input class="ccm-input-text' + f + '" type="text" id="btPcShooterChListFavoritesBookMarksText_' + i + '" name="btPcShooterChListFavoritesBookMarksText[]" value="' + n.btPcShooterChListFavoritesBookMarksText + '" />' + titleEnd + '</td>';
         if (isLink) {
@@ -141,8 +133,9 @@ createForm = function (l) {
         jQUSel_EditBookMarks.append(fstr);
         fstr = '';
         $('#btPcShooterChListFavoritesBookMarksDate_' + i).datepicker();
+        //TODO get the dateFormat from controller
         $('#btPcShooterChListFavoritesBookMarksDate_' + i).datepicker(
-            "setDate", n.btPcShooterChListFavoritesBookMarksDate, "option", "dateFormat", 'yy-mm-dd'
+            "setDate", n.btPcShooterChListFavoritesBookMarksDate, "option", "dateFormat", 'y/m/d'
         );
     })
     $('#ccm-dialog-loader-wrapper').hide();
